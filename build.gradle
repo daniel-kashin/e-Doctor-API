@@ -46,23 +46,35 @@ ext['springCloudVersion'] = 'Greenwich.RC1'
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-integration')
 	implementation('org.springframework.boot:spring-boot-starter-security')
+
+	implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
+
 	implementation('de.codecentric:spring-boot-admin-starter-client')
 	implementation('de.codecentric:spring-boot-admin-starter-server')
+
 	implementation('org.apache.kafka:kafka-streams')
-	implementation('org.springframework.cloud:spring-cloud-starter-oauth2')
+	implementation('org.springframework.kafka:spring-kafka')
 	implementation('org.springframework.cloud:spring-cloud-stream-binder-kafka')
 	implementation('org.springframework.cloud:spring-cloud-stream-binder-kafka-streams')
+
+	implementation('org.springframework.cloud:spring-cloud-starter-oauth2')
+
 	implementation('org.springframework.cloud:spring-cloud-stream-reactive')
-	implementation('org.springframework.kafka:spring-kafka')
+
+	runtimeOnly('mysql:mysql-connector-java')
+
+	runtimeOnly('org.springframework.boot:spring-boot-devtools')
+	compileOnly('org.projectlombok:lombok')
+
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	runtimeOnly('org.springframework.boot:spring-boot-devtools')
-	runtimeOnly('mysql:mysql-connector-java')
-	compileOnly('org.projectlombok:lombok')
+
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.cloud:spring-cloud-stream-test-support')
 	testImplementation('org.springframework.kafka:spring-kafka-test')
 	testImplementation('org.springframework.security:spring-security-test')
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
 
 dependencyManagement {
