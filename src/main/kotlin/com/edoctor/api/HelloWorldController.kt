@@ -33,6 +33,8 @@ class HelloWorldController {
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Bad name!")
-    class BadNameException() : RuntimeException()
+    class BadNameException() : RuntimeException() {
+        override fun fillInStackTrace() = this
+    }
 
 }
