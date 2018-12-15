@@ -61,6 +61,8 @@ dependencies {
 
 	implementation('org.springframework.cloud:spring-cloud-stream-reactive')
 
+	compile ('io.github.microutils:kotlin-logging:1.6.22')
+
 	runtimeOnly('mysql:mysql-connector-java')
 
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
