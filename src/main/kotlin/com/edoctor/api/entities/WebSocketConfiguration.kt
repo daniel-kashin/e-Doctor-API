@@ -1,20 +1,21 @@
 package com.edoctor.api.entities
 
-import org.springframework.context.annotation.Bean
+import mu.KotlinLogging
 import org.springframework.context.annotation.Configuration
-import org.springframework.messaging.simp.config.MessageBrokerRegistry
-import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.config.annotation.*
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor
 
 @Configuration
 @EnableWebSocket
 class WebSocketConfiguration : WebSocketConfigurer {
 
-    override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(chatHandler(), "/chat")
-    }
+    val log = KotlinLogging.logger { }
 
-    @Bean
-    fun chatHandler() = ChatHandler()
+    override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
+        log.info { "registerWebSocketHandlers()" }
+        registry.addHandler(ChatHandler(), "/chat")
+                .setAllowedOrigins("*")
+                .addInterceptors(HttpSessionHandshakeInterceptor())
+    }
 
 }
