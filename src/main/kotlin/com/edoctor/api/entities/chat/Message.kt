@@ -13,6 +13,22 @@ abstract class UserMessage : Message() {
 }
 
 
+// TODO
+data class ConsultationStatusMessage(
+        override val uuid: String,
+        override val recipientUuid: String,
+        override val sendingTimestamp: Long,
+        val initiatorUuid: String,
+        val statusType: StatusType
+) : SystemMessage() {
+
+    sealed class StatusType {
+        class Started(val startTimestamp: Long) : StatusType()
+        class Missed(val initiationTimestamp: Long) : StatusType()
+        class Ended(val endTimestamp: Long) : StatusType()
+    }
+}
+
 data class CallStatusMessage(
         override val uuid: String,
         override val recipientUuid: String,

@@ -46,6 +46,7 @@ ext['springCloudVersion'] = 'Greenwich.RC1'
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-integration')
 	implementation('org.springframework.boot:spring-boot-starter-security')
+	implementation('org.springframework.boot:spring-boot-starter-websocket')
 
 	implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
 
