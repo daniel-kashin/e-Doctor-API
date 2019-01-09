@@ -12,20 +12,21 @@ class ChatHandler : TextWebSocketHandler() {
 
     val log = KotlinLogging.logger { }
 
-    var sessions: List<WebSocketSession> = ArrayList()
+    var chatSessions: List<WebSocketSession> = ArrayList()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         log.info { "handleTextMessage($session, $message)" }
-        sessions.forEach { it.sendMessage(message) }
+        chatSessions.forEach { it.sendMessage(message) }
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        sessions += session
-        log.info { "afterConnectionEstablished(sessions=$sessions)" }
+        chatSessions += session
+        log.info { "afterConnectionEstablished(chatSessions=$chatSessions)" }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        sessions -= session
-        log.info { "afterConnectionClosed(sessions=$sessions)" }
+        chatSessions -= session
+        log.info { "afterConnectionClosed(chatSessions=$chatSessions)" }
     }
+
 }
