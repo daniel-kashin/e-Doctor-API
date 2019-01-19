@@ -1,5 +1,6 @@
-package com.edoctor.api.entities
+package com.edoctor.api.chat
 
+import com.edoctor.api.chat.ChatHandler
 import mu.KotlinLogging
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.config.annotation.*

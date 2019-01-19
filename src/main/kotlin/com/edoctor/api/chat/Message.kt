@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.chat
+package com.edoctor.api.chat
 
 abstract class Message {
     abstract val uuid: String

@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.security
+package com.edoctor.api.security
 
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer

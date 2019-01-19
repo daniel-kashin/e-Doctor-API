@@ -1,4 +1,4 @@
-package com.edoctor.api.entities
+package com.edoctor.api.chat
 
 import mu.KotlinLogging
 import org.springframework.stereotype.Component

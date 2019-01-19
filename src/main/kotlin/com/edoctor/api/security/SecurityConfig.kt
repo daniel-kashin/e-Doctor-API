@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.security
+package com.edoctor.api.security
 
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.context.annotation.Configuration
@@ -23,7 +23,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     private lateinit var passwordEncoder: PasswordEncoder
 
     override fun configure(web: WebSecurity) {
-        web.ignoring().antMatchers("/register")
+        web.ignoring()
+                .antMatchers("/register")
+                .antMatchers("/login")
     }
 
     @Autowired

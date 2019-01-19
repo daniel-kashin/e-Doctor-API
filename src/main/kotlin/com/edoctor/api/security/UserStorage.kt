@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.security
+package com.edoctor.api.security
 
 import com.edoctor.api.entities.User
 import org.springframework.stereotype.Repository

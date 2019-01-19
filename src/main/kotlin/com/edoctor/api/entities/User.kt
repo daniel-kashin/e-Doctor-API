@@ -23,12 +23,12 @@ data class Patient(
         override val uuid: String,
         override val email: String,
         override val password: String,
-        override val name: String?,
-        override val lastName: String?,
-        override val patronymic: String?,
-        override val currentCity: String?,
-        override val gender: Gender?,
-        override val birthdayTimestamp: Long?
+        override val name: String? = null,
+        override val lastName: String? = null,
+        override val patronymic: String? = null,
+        override val currentCity: String? = null,
+        override val gender: Gender? = null,
+        override val birthdayTimestamp: Long? = null
 ) : User()
 
 data class Doctor(

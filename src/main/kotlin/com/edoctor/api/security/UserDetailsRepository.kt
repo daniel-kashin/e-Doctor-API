@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.security
+package com.edoctor.api.security
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.core.userdetails.UserDetails
