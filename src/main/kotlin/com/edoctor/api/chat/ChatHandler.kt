@@ -12,6 +12,7 @@ class ChatHandler : TextWebSocketHandler() {
 
     val log = KotlinLogging.logger { }
 
+    // TODO: synchronize
     var chatSessions: List<WebSocketSession> = ArrayList()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -21,6 +22,7 @@ class ChatHandler : TextWebSocketHandler() {
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         chatSessions += session
+        log.info { "afterConnectionEstablished(principal=${session.principal})" }
         log.info { "afterConnectionEstablished(chatSessions=$chatSessions)" }
     }
 
