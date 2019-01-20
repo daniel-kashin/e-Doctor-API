@@ -25,6 +25,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(web: WebSecurity) {
         web.ignoring()
                 .antMatchers("/register")
+                .and()
+                .ignoring()
                 .antMatchers("/login")
     }
 

@@ -2,21 +2,21 @@ package com.edoctor.api.chat
 
 abstract class Message {
     abstract val uuid: String
-    abstract val recipientUuid: String
+    abstract val recipientEmail: String
     abstract val sendingTimestamp: Long
 }
 
 abstract class SystemMessage : Message()
 
 abstract class UserMessage : Message() {
-    abstract val senderUuid: String
+    abstract val senderEmail: String
 }
 
 
 // TODO
 data class ConsultationStatusMessage(
         override val uuid: String,
-        override val recipientUuid: String,
+        override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val initiatorUuid: String,
         val statusType: StatusType
@@ -31,7 +31,7 @@ data class ConsultationStatusMessage(
 
 data class CallStatusMessage(
         override val uuid: String,
-        override val recipientUuid: String,
+        override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val initiatorUuid: String,
         val statusType: StatusType
@@ -46,7 +46,7 @@ data class CallStatusMessage(
 
 data class MedicalRecordsAccessChangedMessage(
         override val uuid: String,
-        override val recipientUuid: String,
+        override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val isAllowed: Boolean,
         val patientUuid: String,
@@ -62,16 +62,16 @@ data class MedicalRecordsAccessChangedMessage(
 
 data class DocumentMessage(
         override val uuid: String,
-        override val senderUuid: String,
-        override val recipientUuid: String,
+        override val senderEmail: String,
+        override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val documentUuid: String
 ) : UserMessage()
 
 data class TextMessage(
         override val uuid: String,
-        override val senderUuid: String,
-        override val recipientUuid: String,
+        override val senderEmail: String,
+        override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val text: String
 ) : UserMessage()

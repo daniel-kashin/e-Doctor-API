@@ -6,6 +6,7 @@ import com.edoctor.api.entities.User
 import com.edoctor.api.exception.NoLogHttpServerErrorExceprion
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -29,37 +30,27 @@ class AuthorizationController {
     private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/register")
-    fun register(@RequestBody loginRequest: LoginRequest): User {
+    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<User> {
         if (userStorage.findUserByEmail(loginRequest.email) != null) {
-            throw NoLogHttpServerErrorExceprion(HttpStatus.BAD_REQUEST, "User already exists")
+            return ResponseEntity(HttpStatus.CONFLICT)
         }
 
         val user = Patient(UUID.randomUUID().toString(), loginRequest.email, loginRequest.password)
 
         userStorage.save(user)
 
-        val usernamePasswordToken = UsernamePasswordAuthenticationToken(user.email, loginRequest.password)
-
-        // authenticate token with the given account details
-        val authentication = authenticationManager.authenticate(usernamePasswordToken)
-
-        if (authentication.isAuthenticated) {
-            // provide authentication info to the context
-            SecurityContextHolder.getContext().authentication = usernamePasswordToken
-        }
-
-        return user
+        return ResponseEntity.ok(user)
     }
 
     @PostMapping("/login")
-    fun login(email: String, password: String): User {
-        val user = userStorage.findUserByEmail(email)
-                ?: throw NoLogHttpServerErrorExceprion(HttpStatus.BAD_REQUEST, "User not exists")
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<User> {
+        val user = userStorage.findUserByEmail(loginRequest.email)
+                ?: return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (passwordEncoder.matches(password, user.password)) {
-            return user
+        if (passwordEncoder.matches(loginRequest.password, user.password)) {
+            return ResponseEntity.ok(user)
         } else {
-            throw NoLogHttpServerErrorExceprion(HttpStatus.BAD_REQUEST, "Wrong password")
+            return ResponseEntity(HttpStatus.CONFLICT)
         }
     }
 
