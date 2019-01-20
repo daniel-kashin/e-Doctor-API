@@ -78,6 +78,9 @@ dependencies {
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
 	compileOnly('org.projectlombok:lombok')
 
+	implementation("com.google.code.gson:gson:2.8.2")
+
+
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
