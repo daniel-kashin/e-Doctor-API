@@ -1,4 +1,4 @@
-package com.edoctor.api.security
+package com.edoctor.api.configuration.resource
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer

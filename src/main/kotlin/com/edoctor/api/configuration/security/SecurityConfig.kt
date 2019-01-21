@@ -1,4 +1,4 @@
-package com.edoctor.api.security
+package com.edoctor.api.configuration.security
 
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.context.annotation.Configuration

@@ -1,11 +1,11 @@
-package com.edoctor.api.chat
+package com.edoctor.api.controller
 
 import com.google.gson.Gson
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
-import com.edoctor.api.chat.TextMessage as ChatTextMessage
+import com.edoctor.api.entities.TextMessage as ChatTextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.lang.StringBuilder

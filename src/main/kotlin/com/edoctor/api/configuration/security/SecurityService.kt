@@ -1,4 +1,4 @@
-package com.edoctor.api.security
+package com.edoctor.api.configuration.security
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
