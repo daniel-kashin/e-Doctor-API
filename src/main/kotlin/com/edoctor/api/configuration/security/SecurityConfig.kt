@@ -14,10 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
 
-@Order(2)
 @Configuration
 @EnableWebSecurity
-@EnableResourceServer
+@Order(2)
 class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
