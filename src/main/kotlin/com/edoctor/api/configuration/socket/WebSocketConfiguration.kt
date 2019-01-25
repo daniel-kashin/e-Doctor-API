@@ -1,22 +1,46 @@
 package com.edoctor.api.configuration.socket
 
 import com.edoctor.api.controller.ChatHandler
-import mu.KotlinLogging
+import com.edoctor.api.repositories.DoctorRepository
+import com.edoctor.api.repositories.PatientRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.server.ServerHttpRequest
+import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.config.annotation.*
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor
+import java.security.Principal
 
 @Configuration
 @EnableWebSocket
 class WebSocketConfiguration : WebSocketConfigurer {
 
-    val log = KotlinLogging.logger { }
+    @Autowired
+    private lateinit var doctorRepository: DoctorRepository
+
+    @Autowired
+    private lateinit var patientRepository: PatientRepository
 
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        log.info { "registerWebSocketHandlers()" }
         registry.addHandler(ChatHandler(), "/chat")
                 .setAllowedOrigins("*")
                 .addInterceptors(HttpSessionHandshakeInterceptor())
+                .setHandshakeHandler(
+                        object : DefaultHandshakeHandler() {
+                            override fun determineUser(request: ServerHttpRequest, wsHandler: WebSocketHandler, attributes: MutableMap<String, Any>): Principal? {
+                                val user = super.determineUser(request, wsHandler, attributes) ?: return null
+
+                                val doctor = doctorRepository.findByEmail(user.name)
+                                if (doctor != null) return WebSocketPrincipal(user.name, doctor.uuid, true)
+
+                                val patient = patientRepository.findByEmail(user.name)
+                                if (patient != null) return WebSocketPrincipal(user.name, patient.uuid,false)
+
+                                return null
+                            }
+                        }
+                )
     }
 
 }
