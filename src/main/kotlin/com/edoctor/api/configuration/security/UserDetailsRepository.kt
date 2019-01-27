@@ -1,5 +1,6 @@
 package com.edoctor.api.configuration.security
 
+import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.core.userdetails.UserDetails
@@ -15,8 +16,13 @@ class UserDetailsRepository : UserDetailsService {
     @Autowired
     private lateinit var patientRepository: PatientRepository
 
+    @Autowired
+    private lateinit var doctorRepository: DoctorRepository
+
     override fun loadUserByUsername(email: String): UserDetails {
-        val user = patientRepository.findById(email).orElseThrow { throw UsernameNotFoundException("") }
+        val user = patientRepository.findByEmail(email)
+                ?: doctorRepository.findByEmail(email)
+                ?: throw UsernameNotFoundException("")
 
         return User(user.email, user.password, listOf(SimpleGrantedAuthority("USER")))
     }

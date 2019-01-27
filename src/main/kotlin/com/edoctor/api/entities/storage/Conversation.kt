@@ -1,9 +1,11 @@
 package com.edoctor.api.entities.storage
 
 import com.edoctor.api.entities.storage.base.RandomUuidEntity
+import com.edoctor.api.util.NoArg
 import java.util.*
 import javax.persistence.*
 
+@NoArg
 @Entity
 @Table(name = "conversations", uniqueConstraints = [UniqueConstraint(columnNames = ["patientUuid", "doctorUuid"])])
 data class Conversation(

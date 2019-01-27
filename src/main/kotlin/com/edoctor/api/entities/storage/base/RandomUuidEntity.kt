@@ -1,14 +1,16 @@
 package com.edoctor.api.entities.storage.base
 
+import com.edoctor.api.util.NoArg
 import org.springframework.data.domain.Persistable
 import java.util.*
 import javax.persistence.*
 
+@NoArg
 @MappedSuperclass
 abstract class RandomUuidEntity(givenId: UUID? = null) : Persistable<String> {
 
     @Id
-    @Column(name = "id", length = 16, unique = true, nullable = false)
+    @Column(name = "id", unique = true, nullable = false)
     val uuid: String = (givenId ?: UUID.randomUUID()).toString()
 
     @Transient

@@ -5,8 +5,7 @@ import com.edoctor.api.entities.storage.Doctor
 import com.edoctor.api.mapper.UserMapper
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.entities.storage.Patient
-import com.edoctor.api.entities.storage.base.User
-import com.edoctor.api.entities.network.User as NetworkUser
+import com.edoctor.api.entities.network.UserResult
 import com.edoctor.api.repositories.PatientRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -34,14 +33,12 @@ class AuthorizationController {
     private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/register")
-    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<NetworkUser> {
-        if (patientRepository.findByEmail(loginRequest.email) != null
-                || doctorRepository.findByEmail(loginRequest.email) != null
-        ) {
+    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResult> {
+        if (patientRepository.existsByEmail(loginRequest.email) || doctorRepository.existsByEmail(loginRequest.email)) {
             return ResponseEntity(HttpStatus.CONFLICT)
         }
 
-        val user: NetworkUser = if (loginRequest.isPatient) {
+        val user: UserResult = if (loginRequest.isPatient) {
             Patient(email = loginRequest.email, password = loginRequest.password, conversations = emptySet())
                     .also { patientRepository.save(it) }
                     .let { patient -> UserMapper.toNetwork(patient) }
@@ -55,7 +52,7 @@ class AuthorizationController {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<NetworkUser> {
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResult> {
         return if (loginRequest.isPatient) {
             val patient = patientRepository.findByEmail(loginRequest.email)
                     ?: return ResponseEntity(HttpStatus.BAD_REQUEST)

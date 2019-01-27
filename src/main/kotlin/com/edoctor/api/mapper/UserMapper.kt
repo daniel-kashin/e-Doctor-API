@@ -2,7 +2,7 @@ package com.edoctor.api.mapper
 
 import com.edoctor.api.entities.storage.Doctor
 import com.edoctor.api.entities.storage.Patient
-import com.edoctor.api.entities.network.User as NetworkUser
+import com.edoctor.api.entities.network.UserResult as NetworkUser
 
 object UserMapper {
 
