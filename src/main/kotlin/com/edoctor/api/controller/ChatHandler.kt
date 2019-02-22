@@ -41,7 +41,7 @@ class ChatHandler : TextWebSocketHandler() {
                 val patientUuid = if (principal.isPatient) principal.uuid else chatMessage.recipientUuid
                 val doctorUuid = if (principal.isPatient) chatMessage.recipientUuid else principal.name
 
-                val conversation = conversationRepository.findByPatientUuidAndDoctorUuid(patientUuid, principal.name)
+                val conversation = conversationRepository.findByPatientUuidAndDoctorUuid(patientUuid, doctorUuid)
                         ?: run {
                             val patient = patientRepository.findById(patientUuid).orElse(null) ?: return@let
                             val doctor = doctorRepository.findById(doctorUuid).orElse(null) ?: return@let

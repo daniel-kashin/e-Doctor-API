@@ -10,7 +10,6 @@ import javax.persistence.*
 @Table(name = "messages")
 data class Message(
 
-
         @Column(nullable = false)
         val timestamp: Long,
 
@@ -23,4 +22,5 @@ data class Message(
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "conversationUuid", nullable = false, insertable = false, updatable = false)
         val conversation: Conversation
+
 ) : RandomUuidEntity()

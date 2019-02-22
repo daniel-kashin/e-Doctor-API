@@ -1,3 +1,9 @@
 package com.edoctor.api.entities.network
 
-data class LoginRequest(val email: String, val password: String, val isPatient: Boolean)
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class LoginRequest(
+        val email: String,
+        val password: String,
+        @get:JsonProperty("isPatient") val isPatient: Boolean
+)

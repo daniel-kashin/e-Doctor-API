@@ -12,7 +12,6 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.config.annotation.web.builders.WebSecurity
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
 
 @Configuration
 @EnableWebSecurity
@@ -26,7 +25,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     private lateinit var passwordEncoder: PasswordEncoder
 
     override fun configure(web: WebSecurity) {
-        web.ignoring()
+        web
+                .ignoring()
                 .antMatchers("/register")
                 .and()
                 .ignoring()
@@ -44,6 +44,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
 
     @Bean
+    // TODO: replace with encider
     fun passwordEncoder(): PasswordEncoder = NoOpPasswordEncoder.getInstance()
 
 }

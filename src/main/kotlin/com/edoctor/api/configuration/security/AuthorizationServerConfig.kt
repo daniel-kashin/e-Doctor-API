@@ -17,16 +17,16 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
 
     companion object {
-        internal val CLIENT_ID = "client"
-        internal val CLIENT_SECRET = "clientpassword"
-        internal val KEY_TYPE_PASSWORD = "password"
-        internal val KEY_AUTHORIZATION_CODE = "authorization_code"
-        internal val KEY_REFRESH_TOKEN = "refresh_token"
-        internal val KEY_IMPLICIT = "implicit"
-        internal val SCOPE_READ = "read"
-        internal val SCOPE_WRITE = "write"
-        internal val TRUST = "trust"
-        internal val ACCESS_TOKEN_VALIDITY_SECONDS = 1 * 20
+        internal const val CLIENT_ID = "client"
+        internal const val CLIENT_SECRET = "clientpassword"
+        internal const val KEY_TYPE_PASSWORD = "password"
+        internal const val KEY_AUTHORIZATION_CODE = "authorization_code"
+        internal const val KEY_REFRESH_TOKEN = "refresh_token"
+        internal const val KEY_IMPLICIT = "implicit"
+        internal const val SCOPE_READ = "read"
+        internal const val SCOPE_WRITE = "write"
+        internal const val TRUST = "trust"
+        internal const val ACCESS_TOKEN_VALIDITY_SECONDS = 1 * 20
     }
 
     @Autowired
