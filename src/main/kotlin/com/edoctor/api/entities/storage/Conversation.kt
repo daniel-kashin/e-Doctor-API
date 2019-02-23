@@ -18,5 +18,5 @@ data class Conversation(
         val doctor: Doctor,
 
         @OneToMany(mappedBy = "conversation", cascade = [CascadeType.ALL])
-        val messages: MutableSet<Message>
+        val messages: MutableList<Message>
 ) : RandomUuidEntity()

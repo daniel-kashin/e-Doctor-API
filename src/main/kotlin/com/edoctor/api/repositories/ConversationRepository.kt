@@ -9,4 +9,8 @@ interface ConversationRepository : JpaRepository<Conversation, String> {
 
     fun findByPatientUuidAndDoctorUuid(patientUuid: String, doctorUuid: String) : Conversation?
 
+    fun findByPatientUuid(patientUuid: String) : List<Conversation>
+
+    fun findByDoctorUuid(doctorUuid: String) : List<Conversation>
+
 }

@@ -45,7 +45,7 @@ class ChatHandler : TextWebSocketHandler() {
                         ?: run {
                             val patient = patientRepository.findById(patientUuid).orElse(null) ?: return@let
                             val doctor = doctorRepository.findById(doctorUuid).orElse(null) ?: return@let
-                            Conversation(patient, doctor, mutableSetOf())
+                            Conversation(patient, doctor, mutableListOf())
                         }
 
                 conversation.messages.add(

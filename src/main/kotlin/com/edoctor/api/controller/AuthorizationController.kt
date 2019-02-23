@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
 
 @RestController
@@ -55,6 +56,11 @@ class AuthorizationController {
         }
 
         return ResponseEntity.ok(user)
+    }
+
+    @GetMapping("/gethuy")
+    fun getHuy() : String {
+        return "huy"
     }
 
     @PostMapping("/login")

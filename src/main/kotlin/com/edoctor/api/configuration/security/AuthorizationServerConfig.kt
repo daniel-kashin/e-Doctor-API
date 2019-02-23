@@ -26,7 +26,7 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         internal const val SCOPE_READ = "read"
         internal const val SCOPE_WRITE = "write"
         internal const val TRUST = "trust"
-        internal const val ACCESS_TOKEN_VALIDITY_SECONDS = 1 * 20
+        internal const val ACCESS_TOKEN_VALIDITY_SECONDS = 1 * 60 * 60 * 24
     }
 
     @Autowired
@@ -34,6 +34,9 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
 
     @Autowired
     private lateinit var authenticationManager: AuthenticationManager
+
+    @Autowired
+    private lateinit var userDetailsRepository: UserDetailsRepository
 
     override fun configure(configurer: ClientDetailsServiceConfigurer) {
         configurer
@@ -48,10 +51,13 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
         endpoints.tokenStore(tokenStore)
                 .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsRepository)
     }
 
     override fun configure(oauthServer: AuthorizationServerSecurityConfigurer) {
-        oauthServer.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()")
+        oauthServer
+                .tokenKeyAccess("permitAll()")
+                .checkTokenAccess("isAuthenticated()")
     }
 
     @Bean
