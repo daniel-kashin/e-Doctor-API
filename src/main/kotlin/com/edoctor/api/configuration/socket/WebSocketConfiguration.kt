@@ -32,10 +32,10 @@ class WebSocketConfiguration : WebSocketConfigurer {
                                 val user = super.determineUser(request, wsHandler, attributes) ?: return null
 
                                 val doctor = doctorRepository.findByEmail(user.name)
-                                if (doctor != null) return WebSocketPrincipal(user.name, doctor.uuid, true)
+                                if (doctor != null) return WebSocketPrincipal(user.name, doctor.uuid, false)
 
                                 val patient = patientRepository.findByEmail(user.name)
-                                if (patient != null) return WebSocketPrincipal(user.name, patient.uuid,false)
+                                if (patient != null) return WebSocketPrincipal(user.name, patient.uuid,true)
 
                                 return null
                             }

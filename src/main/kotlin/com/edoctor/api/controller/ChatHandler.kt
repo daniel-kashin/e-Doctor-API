@@ -8,6 +8,8 @@ import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import com.google.gson.Gson
+import mu.KotlinLogging
+import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -20,6 +22,8 @@ import javax.transaction.Transactional
 
 @Component
 class ChatHandler : TextWebSocketHandler() {
+
+    val log = logger { }
 
     @Autowired
     private lateinit var conversationRepository: ConversationRepository
@@ -35,6 +39,8 @@ class ChatHandler : TextWebSocketHandler() {
     @Transactional
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         try {
+            log.info { "handleTextMessage(session=${session.principal}, message=${message.payload})" }
+
             session.webSocketPrincipal?.let { principal ->
                 val chatMessage = Gson().fromJson(message.payload, ChatTextMessage::class.java)
 
@@ -69,6 +75,7 @@ class ChatHandler : TextWebSocketHandler() {
             val list = chatSessions[email] ?: mutableListOf()
             chatSessions += email to list.apply { add(session) }
         }
+        log.info { "afterConnectionEstablished(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -80,6 +87,16 @@ class ChatHandler : TextWebSocketHandler() {
                 chatSessions += email to afterRemove
             }
         }
+        log.info { "afterConnectionClosed(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
+    }
+
+    private fun chatSessionsLogInfo(): String {
+        val builder = StringBuilder("[")
+        chatSessions.keys.forEach {
+            builder.append((it to (chatSessions[it]?.size ?: 0)).toString())
+        }
+        builder.append("]")
+        return builder.toString()
     }
 
     private fun WebSocketSession?.sendMessageIfOpened(message: TextMessage) =
