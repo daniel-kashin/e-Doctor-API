@@ -1,9 +1,11 @@
 package com.edoctor.api.configuration.socket
 
 import com.edoctor.api.controller.ChatHandler
+import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.web.socket.WebSocketHandler
@@ -17,13 +19,19 @@ import java.security.Principal
 class WebSocketConfiguration : WebSocketConfigurer {
 
     @Autowired
+    private lateinit var conversationRepository: ConversationRepository
+
+    @Autowired
     private lateinit var doctorRepository: DoctorRepository
 
     @Autowired
     private lateinit var patientRepository: PatientRepository
 
+    @Autowired
+    private lateinit var chatHandler: ChatHandler
+
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(ChatHandler(), "/chat")
+        registry.addHandler(chatHandler, "/chat")
                 .setAllowedOrigins("*")
                 .addInterceptors(HttpSessionHandshakeInterceptor())
                 .setHandshakeHandler(

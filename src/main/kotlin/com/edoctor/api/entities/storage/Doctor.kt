@@ -8,8 +8,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "doctors")
 class Doctor(
-        @OneToMany(mappedBy = "doctor", cascade = [CascadeType.ALL])
-        val conversations: Set<Conversation>,
+        @OneToMany(mappedBy = "doctor", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        val conversations: MutableSet<Conversation>,
 
         email: String,
         password: String

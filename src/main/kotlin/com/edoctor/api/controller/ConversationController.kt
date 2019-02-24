@@ -41,33 +41,39 @@ class ConversationController {
         val user = let {
             val patient = patientRepository.findByEmail(principal.username)
             if (patient != null) {
+                log.info { "got patient: $patient" }
                 patient
             } else {
                 val doctor = doctorRepository.findByEmail(principal.username)
                         ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+                log.info { "got doctor: $doctor" }
+
                 doctor
             }
         }
 
-        val conversations = if (user is Patient) {
-            user.conversations.map { conversation ->
+        val conversations = when (user) {
+            is Patient -> user.conversations.map { conversation ->
                 val message = conversation.messages.first()
+                log.info { "got message ${message.text} from ${conversation.doctor.email}" }
                 val senderEmail = if (message.isFromPatient) user.email else conversation.doctor.email
                 val recipientEmail = if (message.isFromPatient) conversation.doctor.email else user.email
                 TextMessage(message.uuid, senderEmail, recipientEmail, message.timestamp, message.text)
+                        .also { log.info { "created $it" } }
             }
-        } else if (user is Doctor) {
-            user.conversations.map { conversation ->
+            is Doctor -> user.conversations.map { conversation ->
                 val message = conversation.messages.first()
+                log.info { "got message ${message.text} from ${conversation.patient.email}" }
                 val senderEmail = if (message.isFromPatient) conversation.patient.email else user.email
                 val recipientEmail = if (message.isFromPatient) user.email else conversation.patient.email
                 TextMessage(message.uuid, senderEmail, recipientEmail, message.timestamp, message.text)
+                        .also { log.info { "created $it" } }
             }
-        } else {
-            throw IllegalStateException()
+            else -> throw IllegalStateException()
         }
 
-        return ResponseEntity.ok(ConversationsResult(conversations))
+        return ResponseEntity.ok(ConversationsResult(conversations.sortedByDescending { it.sendingTimestamp }))
     }
 
 }

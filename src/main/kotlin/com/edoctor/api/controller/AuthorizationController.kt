@@ -40,14 +40,14 @@ class AuthorizationController {
         }
 
         val user: UserResult = if (loginRequest.isPatient) {
-            Patient(email = loginRequest.email, password = loginRequest.password, conversations = emptySet())
+            Patient(email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .also { patientRepository.save(it) }
                     .let {
                         log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
                         UserMapper.toNetwork(it)
                     }
         } else {
-            Doctor(email = loginRequest.email, password = loginRequest.password, conversations = emptySet())
+            Doctor(email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .also { doctorRepository.save(it) }
                     .let {
                         log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }

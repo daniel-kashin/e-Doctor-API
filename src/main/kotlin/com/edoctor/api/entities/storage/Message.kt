@@ -20,7 +20,7 @@ data class Message(
         val isFromPatient: Boolean,
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "conversationUuid", nullable = false, insertable = false, updatable = false)
+        @JoinColumn(name = "conversationUuid", nullable = false)
         val conversation: Conversation
 
 ) : RandomUuidEntity()
