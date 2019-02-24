@@ -2,13 +2,11 @@ package com.edoctor.api.controller
 
 import com.edoctor.api.configuration.socket.WebSocketPrincipal
 import com.edoctor.api.entities.storage.Conversation
-import com.edoctor.api.entities.storage.Doctor
 import com.edoctor.api.entities.storage.Message
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import com.google.gson.Gson
-import mu.KotlinLogging
 import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -44,8 +42,8 @@ class ChatHandler : TextWebSocketHandler() {
             session.webSocketPrincipal?.let { principal ->
                 val chatMessage = Gson().fromJson(message.payload, ChatTextMessage::class.java)
 
-                val patientUuid = if (principal.isPatient) principal.uuid else chatMessage.recipientUuid
-                val doctorUuid = if (principal.isPatient) chatMessage.recipientUuid else principal.name
+                val patientUuid = if (principal.isPatient) principal.uuid else chatMessage.recipientEmail
+                val doctorUuid = if (principal.isPatient) chatMessage.recipientEmail else principal.name
 
                 val conversation = conversationRepository.findByPatientUuidAndDoctorUuid(patientUuid, doctorUuid)
                         ?: run {
@@ -61,7 +59,7 @@ class ChatHandler : TextWebSocketHandler() {
 
                 session.sendMessageIfOpened(message)
 
-                chatSessions[chatMessage.recipientUuid]?.forEach {
+                chatSessions[chatMessage.recipientEmail]?.forEach {
                     it.sendMessageIfOpened(message)
                 }
             }
