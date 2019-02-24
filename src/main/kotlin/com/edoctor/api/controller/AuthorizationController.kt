@@ -58,11 +58,6 @@ class AuthorizationController {
         return ResponseEntity.ok(user)
     }
 
-    @GetMapping("/gethuy")
-    fun getHuy() : String {
-        return "huy"
-    }
-
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResult> {
         return if (loginRequest.isPatient) {
