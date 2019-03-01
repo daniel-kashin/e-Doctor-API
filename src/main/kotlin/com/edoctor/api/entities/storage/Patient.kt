@@ -8,7 +8,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "patients")
 class Patient(
-        @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         val conversations: MutableSet<Conversation>,
 
         email: String,
