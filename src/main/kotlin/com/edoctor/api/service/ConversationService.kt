@@ -7,14 +7,20 @@ import com.edoctor.api.entities.storage.Message
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
+import com.edoctor.api.utils.currentUnixTime
 import mu.KotlinLogging
+import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
+import java.util.UUID.randomUUID
 
 @Repository
 @Transactional
 class ConversationService {
+
+    private val log = logger {}
 
     @Autowired
     private lateinit var conversationRepository: ConversationRepository
@@ -34,17 +40,27 @@ class ConversationService {
                 ?: run {
                     val patient = patientRepository.findByEmail(patientEmail) ?: return false
                     val doctor = doctorRepository.findByEmail(doctorEmail) ?: return false
-                    Conversation(patient, doctor, mutableListOf())
+                    Conversation(
+                            givenUuid = randomUUID(),
+                            patient = patient,
+                            doctor = doctor,
+                            messages = mutableListOf()
+                    )
                 }
 
         conversation.run {
             messages.add(
                     Message(
-                            timestamp = System.currentTimeMillis() / 1000,
+                            givenUuid = UUID.fromString(message.uuid),
+                            timestamp = currentUnixTime(),
                             text = message.text,
                             isFromPatient = message.senderEmail == patientEmail,
                             conversation = this
-                    )
+                    ).also {
+                        log.info {
+                            "saveMessage(givenUuid=${message.uuid}, text=${message.text}, timestamp=${message.sendingTimestamp}"
+                        }
+                    }
             )
             conversationRepository.save(this)
         }

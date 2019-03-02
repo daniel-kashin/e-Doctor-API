@@ -1,3 +1,3 @@
 package com.edoctor.api.entities.network
 
-data class MessagesResult(val lastMessages: List<TextMessage>)
+data class MessagesResult(val messages: List<TextMessage>)

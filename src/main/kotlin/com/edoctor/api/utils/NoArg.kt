@@ -1,4 +1,4 @@
-package com.edoctor.api.util
+package com.edoctor.api.utils
 
 import kotlin.annotation.Retention
 import kotlin.annotation.Target

@@ -1,6 +1,6 @@
 package com.edoctor.api.entities.storage.base
 
-import com.edoctor.api.util.NoArg
+import com.edoctor.api.utils.NoArg
 import org.springframework.data.domain.Persistable
 import java.util.*
 import javax.persistence.*

@@ -62,6 +62,13 @@ class MessagesController {
                         conversation.uuid
                 )
                 .map { MessageMapper.toNetwork(it, patientEmail, doctorEmail) }
+                .also {
+                    it.forEach { message ->
+                        log.info {
+                            "getMessage(givenUuid=${message.uuid}, text=${message.text}, timestamp=${message.sendingTimestamp}"
+                        }
+                    }
+                }
 
         return ResponseEntity.ok(MessagesResult(messages))
     }

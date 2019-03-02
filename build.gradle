@@ -15,7 +15,7 @@ buildscript {
 }
 
 apply plugin: "kotlin-jpa"
-noArg { annotation("com.edoctor.api.util.NoArg") }
+noArg { annotation("com.edoctor.api.utils.NoArg") }
 
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'

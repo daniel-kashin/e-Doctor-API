@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
+import java.util.*
+import java.util.UUID.randomUUID
 
 @RestController
 class AuthorizationController {
@@ -40,17 +42,17 @@ class AuthorizationController {
         }
 
         val user: UserResult = if (loginRequest.isPatient) {
-            Patient(email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
-                    .also { patientRepository.save(it) }
+            Patient(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .let {
                         log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
+                        patientRepository.save(it)
                         UserMapper.toNetwork(it)
                     }
         } else {
-            Doctor(email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
-                    .also { doctorRepository.save(it) }
+            Doctor(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .let {
                         log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }
+                        doctorRepository.save(it)
                         UserMapper.toNetwork(it)
                     }
         }
