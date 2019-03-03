@@ -24,12 +24,12 @@ import javax.transaction.Transactional
 @Component
 class ChatHandler : TextWebSocketHandler() {
 
+    val log = logger { }
+
     @Autowired
     private lateinit var conversationService: ConversationService
 
-    val log = logger { }
-
-    var chatSessions: Map<String, MutableList<WebSocketSession>> = ConcurrentHashMap()
+    var chatSessions: Map<WebSocketPrincipal, MutableList<WebSocketSession>> = ConcurrentHashMap()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         try {
@@ -40,31 +40,38 @@ class ChatHandler : TextWebSocketHandler() {
 
                 session.sendMessageIfOpened(message)
 
-                chatSessions[chatMessage.recipientEmail]?.forEach {
-                    it.sendMessageIfOpened(message)
-                }
+                chatSessions.entries
+                        .filter { chatMessage.belongsToPrincipal(it.key) }
+                        .forEach { (_, sessions) ->
+                            sessions.forEach { it.sendMessageIfOpened(message) }
+                        }
             }
         } catch (e: Exception) {
             log.info { "handleTextMessage($e)" }
         }
     }
 
+    private fun ChatTextMessage.belongsToPrincipal(principal: WebSocketPrincipal): Boolean {
+        return principal.email == senderEmail && principal.recipientEmail == recipientEmail
+                || principal.email == recipientEmail && principal.recipientEmail == senderEmail
+    }
+
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        session.email?.let { email ->
-            val list = chatSessions[email] ?: mutableListOf()
-            chatSessions += email to list.apply { add(session) }
+        session.webSocketPrincipal?.let { principal ->
+            val list = chatSessions[principal] ?: mutableListOf()
+            chatSessions += principal to list.apply { add(session) }
         }
         log.info { "afterConnectionEstablished(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         // TODO: replace with uuid
-        session.email?.let { email ->
-            val afterRemove = chatSessions[email]?.apply { remove(session) } ?: mutableListOf()
+        session.webSocketPrincipal?.let { principal ->
+            val afterRemove = chatSessions[principal]?.apply { remove(session) } ?: mutableListOf()
             if (afterRemove.isEmpty()) {
-                chatSessions -= email
+                chatSessions -= principal
             } else {
-                chatSessions += email to afterRemove
+                chatSessions += principal to afterRemove
             }
         }
         log.info { "afterConnectionClosed(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }

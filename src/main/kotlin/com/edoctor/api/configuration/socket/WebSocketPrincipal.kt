@@ -4,7 +4,7 @@ import java.security.Principal
 
 data class WebSocketPrincipal(
         val email: String,
-        val uuid: String,
+        val recipientEmail: String,
         val isPatient: Boolean
 ) : Principal {
 

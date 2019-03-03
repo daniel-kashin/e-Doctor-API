@@ -4,6 +4,7 @@ import com.edoctor.api.controller.ChatHandler
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
+import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,8 +19,9 @@ import java.security.Principal
 @EnableWebSocket
 class WebSocketConfiguration : WebSocketConfigurer {
 
-    @Autowired
-    private lateinit var conversationRepository: ConversationRepository
+    companion object {
+        private const val RECIPIENT_EMAIL_HEADER = "recipient-email"
+    }
 
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
@@ -38,12 +40,13 @@ class WebSocketConfiguration : WebSocketConfigurer {
                         object : DefaultHandshakeHandler() {
                             override fun determineUser(request: ServerHttpRequest, wsHandler: WebSocketHandler, attributes: MutableMap<String, Any>): Principal? {
                                 val user = super.determineUser(request, wsHandler, attributes) ?: return null
+                                val recipientEmail = request.headers[RECIPIENT_EMAIL_HEADER]?.firstOrNull() ?: return null
 
                                 val doctor = doctorRepository.findByEmail(user.name)
-                                if (doctor != null) return WebSocketPrincipal(user.name, doctor.uuid, false)
+                                if (doctor != null) return WebSocketPrincipal(user.name, recipientEmail, false)
 
                                 val patient = patientRepository.findByEmail(user.name)
-                                if (patient != null) return WebSocketPrincipal(user.name, patient.uuid,true)
+                                if (patient != null) return WebSocketPrincipal(user.name, recipientEmail, true)
 
                                 return null
                             }
