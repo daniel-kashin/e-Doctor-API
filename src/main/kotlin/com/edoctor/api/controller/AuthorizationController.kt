@@ -1,11 +1,11 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.entities.network.LoginRequest
-import com.edoctor.api.entities.storage.Doctor
+import com.edoctor.api.entities.network.request.LoginRequest
+import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.mapper.UserMapper
 import com.edoctor.api.repositories.DoctorRepository
-import com.edoctor.api.entities.storage.Patient
-import com.edoctor.api.entities.network.UserResult
+import com.edoctor.api.entities.storage.PatientEntity
+import com.edoctor.api.entities.network.response.UserResponse
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,10 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
-import java.util.*
 import java.util.UUID.randomUUID
 
 @RestController
@@ -36,20 +33,20 @@ class AuthorizationController {
     private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/register")
-    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResult> {
+    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResponse> {
         if (patientRepository.existsByEmail(loginRequest.email) || doctorRepository.existsByEmail(loginRequest.email)) {
             return ResponseEntity(HttpStatus.CONFLICT)
         }
 
-        val user: UserResult = if (loginRequest.isPatient) {
-            Patient(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
+        val user: UserResponse = if (loginRequest.isPatient) {
+            PatientEntity(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .let {
                         log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
                         patientRepository.save(it)
                         UserMapper.toNetwork(it)
                     }
         } else {
-            Doctor(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
+            DoctorEntity(givenUuid = randomUUID(), email = loginRequest.email, password = loginRequest.password, conversations = mutableSetOf())
                     .let {
                         log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }
                         doctorRepository.save(it)
@@ -61,7 +58,7 @@ class AuthorizationController {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResult> {
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResponse> {
         return if (loginRequest.isPatient) {
             val patient = patientRepository.findByEmail(loginRequest.email)
                     ?: return ResponseEntity(HttpStatus.BAD_REQUEST)

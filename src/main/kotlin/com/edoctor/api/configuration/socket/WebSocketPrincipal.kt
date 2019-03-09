@@ -8,6 +8,10 @@ data class WebSocketPrincipal(
         val isPatient: Boolean
 ) : Principal {
 
+    val patientEmail = if (isPatient) email else recipientEmail
+
+    val doctorEmail = if (isPatient) recipientEmail else email
+
     override fun getName() = email
 
 }

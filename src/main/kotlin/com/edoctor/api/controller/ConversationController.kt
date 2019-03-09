@@ -1,11 +1,10 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.entities.network.ConversationsResult
-import com.edoctor.api.entities.network.TextMessage
-import com.edoctor.api.entities.storage.Doctor
-import com.edoctor.api.entities.storage.Patient
-import com.edoctor.api.mapper.MessageMapper
-import com.edoctor.api.repositories.ConversationRepository
+import com.edoctor.api.entities.network.response.ConversationsResponse
+import com.edoctor.api.entities.storage.DoctorEntity
+import com.edoctor.api.entities.storage.PatientEntity
+import com.edoctor.api.mapper.MessageMapper.toNetwork
+import com.edoctor.api.mapper.MessageMapper.wrapResult
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
@@ -31,7 +30,7 @@ class ConversationController {
 
     // TODO: add getting by pages
     @GetMapping("/conversations")
-    fun getConversations(authentication: OAuth2Authentication): ResponseEntity<ConversationsResult> {
+    fun getConversations(authentication: OAuth2Authentication): ResponseEntity<ConversationsResponse> {
         val principal = authentication.principal as User
 
         log.info { "getConversations: $principal" }
@@ -41,16 +40,20 @@ class ConversationController {
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val conversations = when (user) {
-            is Patient -> user.conversations.map {
-                MessageMapper.toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
+            is PatientEntity -> user.conversations.mapNotNull {
+                toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
             }
-            is Doctor -> user.conversations.map {
-                MessageMapper.toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
+            is DoctorEntity -> user.conversations.mapNotNull {
+                toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
             }
             else -> throw IllegalStateException()
         }
 
-        return ResponseEntity.ok(ConversationsResult(conversations.sortedByDescending { it.sendingTimestamp }))
+        val sortedConversations = conversations
+                .sortedByDescending { it.sendingTimestamp }
+                .mapNotNull { wrapResult(it) }
+
+        return ResponseEntity.ok(ConversationsResponse(sortedConversations))
     }
 
 }

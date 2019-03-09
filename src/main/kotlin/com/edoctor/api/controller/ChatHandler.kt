@@ -1,25 +1,33 @@
 package com.edoctor.api.controller
 
 import com.edoctor.api.configuration.socket.WebSocketPrincipal
-import com.edoctor.api.entities.storage.Conversation
-import com.edoctor.api.entities.storage.Message
+import com.edoctor.api.entities.domain.CallActionRequest
+import com.edoctor.api.entities.domain.CallStatusResponse
+import com.edoctor.api.entities.network.request.CallActionMessageRequest
+import com.edoctor.api.entities.network.request.MessageRequestWrapper
+import com.edoctor.api.entities.network.request.TextMessageRequest
+import com.edoctor.api.entities.storage.ConversationEntity
+import com.edoctor.api.mapper.MessageMapper.toDomainCallAction
+import com.edoctor.api.mapper.MessageMapper.toEntityCallAction
+import com.edoctor.api.mapper.MessageMapper.toEntityText
+import com.edoctor.api.mapper.MessageMapper.toNetwork
+import com.edoctor.api.mapper.MessageMapper.unwrapRequest
+import com.edoctor.api.repositories.CallRepository
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import com.edoctor.api.service.ConversationService
 import com.google.gson.Gson
 import mu.KotlinLogging.logger
-import org.hibernate.Transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
-import com.edoctor.api.entities.network.TextMessage as ChatTextMessage
+import com.edoctor.api.entities.network.response.TextMessageResponse as ChatTextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
-import javax.transaction.Transactional
 
 @Component
 class ChatHandler : TextWebSocketHandler() {
@@ -29,31 +37,85 @@ class ChatHandler : TextWebSocketHandler() {
     @Autowired
     private lateinit var conversationService: ConversationService
 
+    @Autowired
+    private lateinit var conversationRepository: ConversationRepository
+
+    @Autowired
+    private lateinit var doctorRepository: DoctorRepository
+
+    @Autowired
+    private lateinit var patientRepository: PatientRepository
+
+    @Autowired
+    private lateinit var callRepository: CallRepository
+
     var chatSessions: Map<WebSocketPrincipal, MutableList<WebSocketSession>> = ConcurrentHashMap()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         try {
             session.webSocketPrincipal?.let { principal ->
-                val chatMessage = Gson().fromJson(message.payload, ChatTextMessage::class.java)
-
-                conversationService.addMessage(principal.email, principal.isPatient, chatMessage)
-
-                session.sendMessageIfOpened(message)
-
-                chatSessions.entries
-                        .filter { chatMessage.belongsToPrincipal(it.key) }
-                        .forEach { (_, sessions) ->
-                            sessions.forEach { it.sendMessageIfOpened(message) }
-                        }
+                handleMessage(message, principal)
             }
         } catch (e: Exception) {
             log.info { "handleTextMessage($e)" }
         }
     }
 
-    private fun ChatTextMessage.belongsToPrincipal(principal: WebSocketPrincipal): Boolean {
-        return principal.email == senderEmail && principal.recipientEmail == recipientEmail
-                || principal.email == recipientEmail && principal.recipientEmail == senderEmail
+    @Transactional
+    fun handleMessage(
+            requestSocketMessage: TextMessage,
+            principal: WebSocketPrincipal
+    ): Boolean {
+        val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient)
+                ?: return false
+
+        val messageWrapper = Gson().fromJson(requestSocketMessage.payload, MessageRequestWrapper::class.java)
+        val messageRequest = unwrapRequest(messageWrapper)
+
+        when (messageRequest) {
+            is TextMessageRequest -> {
+                val messageEntity = toEntityText(messageRequest, principal.isPatient, conversationEntity)
+
+                conversationService.addMessage(messageEntity, conversationEntity)
+
+                chatSessions.entries
+                        .filter { principal.isInTheSameConversation(it.key) }
+                        .forEach { (_, sessions) ->
+                            sessions.forEach { it.sendMessageIfOpened(requestSocketMessage) }
+                        }
+            }
+            is CallActionMessageRequest -> {
+                val callActionRequest = toDomainCallAction(messageRequest)
+                val callStatusResponse = callRepository.onCallActionRequest(
+                        callActionRequest,
+                        principal.patientEmail,
+                        principal.doctorEmail,
+                        principal.isPatient
+                ) ?: return false
+
+                saveAndSendCallStatusResponse(principal, conversationEntity, callStatusResponse)
+            }
+        }
+
+        return true
+    }
+
+    private fun saveAndSendCallStatusResponse(
+            principal: WebSocketPrincipal,
+            conversationEntity: ConversationEntity,
+            callStatusResponse: CallStatusResponse
+    ) {
+        val messageEntity = toEntityCallAction(callStatusResponse, conversationEntity)
+
+        conversationService.addMessage(messageEntity, conversationEntity)
+
+        val messageResult = toNetwork(messageEntity, principal.patientEmail, principal.doctorEmail)
+        val responseSocketMessage = TextMessage(Gson().toJson(messageResult))
+        chatSessions.entries
+                .filter { principal.isInTheSameConversation(it.key) }
+                .forEach { (_, sessions) ->
+                    sessions.forEach { it.sendMessageIfOpened(responseSocketMessage) }
+                }
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
@@ -65,7 +127,6 @@ class ChatHandler : TextWebSocketHandler() {
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        // TODO: replace with uuid
         session.webSocketPrincipal?.let { principal ->
             val afterRemove = chatSessions[principal]?.apply { remove(session) } ?: mutableListOf()
             if (afterRemove.isEmpty()) {
@@ -73,8 +134,25 @@ class ChatHandler : TextWebSocketHandler() {
             } else {
                 chatSessions += principal to afterRemove
             }
+
+            callRepository.findActiveCall(principal.patientEmail, principal.doctorEmail)?.let { call ->
+                val callStatusResponse = callRepository.onCallActionRequest(call, CallActionRequest.CallAction.LEAVE)
+                        ?: return
+
+                val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient)
+                        ?: return
+
+                saveAndSendCallStatusResponse(principal, conversationEntity, callStatusResponse)
+            }
         }
         log.info { "afterConnectionClosed(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
+    }
+
+    //region utils
+
+    private fun WebSocketPrincipal.isInTheSameConversation(principal: WebSocketPrincipal): Boolean {
+        return principal.email == email && principal.recipientEmail == recipientEmail
+                || principal.email == recipientEmail && principal.recipientEmail == email
     }
 
     private fun chatSessionsLogInfo(): String {
@@ -94,5 +172,7 @@ class ChatHandler : TextWebSocketHandler() {
 
     private val WebSocketSession.webSocketPrincipal: WebSocketPrincipal?
         get() = this.principal as? WebSocketPrincipal
+
+    //endregion
 
 }

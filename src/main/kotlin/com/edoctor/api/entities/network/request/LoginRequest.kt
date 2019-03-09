@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.network
+package com.edoctor.api.entities.network.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

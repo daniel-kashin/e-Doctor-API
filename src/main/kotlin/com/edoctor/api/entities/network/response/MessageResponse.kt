@@ -1,78 +1,83 @@
-package com.edoctor.api.entities.network
+package com.edoctor.api.entities.network.response
 
-abstract class Message {
+abstract class MessageResponse {
     abstract val uuid: String
     abstract val recipientEmail: String
     abstract val sendingTimestamp: Long
 }
 
-abstract class SystemMessage : Message()
+abstract class SystemMessageResponse : MessageResponse()
 
-abstract class UserMessage : Message() {
+abstract class UserMessageResponse : MessageResponse() {
     abstract val senderEmail: String
 }
 
 
-// TODO
-data class ConsultationStatusMessage(
-        override val uuid: String,
-        override val recipientEmail: String,
-        override val sendingTimestamp: Long,
-        val initiatorUuid: String,
-        val statusType: StatusType
-) : SystemMessage() {
-
-    sealed class StatusType {
-        class Started(val startTimestamp: Long) : StatusType()
-        class Missed(val initiationTimestamp: Long) : StatusType()
-        class Ended(val endTimestamp: Long) : StatusType()
-    }
-}
-
-data class CallStatusMessage(
-        override val uuid: String,
-        override val recipientEmail: String,
-        override val sendingTimestamp: Long,
-        val initiatorUuid: String,
-        val statusType: StatusType
-) : SystemMessage() {
-
-    sealed class StatusType {
-        class Started(val startTimestamp: Long) : StatusType()
-        class Missed(val initiationTimestamp: Long) : StatusType()
-        class Ended(val endTimestamp: Long) : StatusType()
-    }
-}
-
-data class MedicalRecordsAccessChangedMessage(
-        override val uuid: String,
-        override val recipientEmail: String,
-        override val sendingTimestamp: Long,
-        val isAllowed: Boolean,
-        val patientUuid: String,
-        val medicalRecordAccessData: MedicalRecordAccessData
-) : SystemMessage() {
-
-    sealed class MedicalRecordAccessData {
-        class AllRecordsAccessData : MedicalRecordAccessData()
-        class SomeRecordsAccessData(val medicalRecordUuids: List<String>) : MedicalRecordAccessData()
-    }
-}
-
-
-data class DocumentMessage(
+data class CallStatusMessageResponse(
         override val uuid: String,
         override val senderEmail: String,
         override val recipientEmail: String,
         override val sendingTimestamp: Long,
-        val documentUuid: String
-) : UserMessage()
+        val callStatus: Int,
+        val callUuid: String
+) : UserMessageResponse() {
 
-data class TextMessage(
+    companion object {
+        const val CALL_STATUS_INITIATED = 1
+        const val CALL_STATUS_STARTED = 2
+        const val CALL_STATUS_CANCELLED = 3
+    }
+
+}
+
+data class TextMessageResponse(
         override val uuid: String,
         // TODO: replace with uuid
         override val senderEmail: String,
         override val recipientEmail: String,
         override val sendingTimestamp: Long,
         val text: String
-) : UserMessage()
+) : UserMessageResponse()
+
+
+
+
+// TODO
+data class ConsultationStatusMessageResponse(
+        override val uuid: String,
+        override val recipientEmail: String,
+        override val sendingTimestamp: Long,
+        val initiatorUuid: String,
+        val statusType: StatusType
+) : SystemMessageResponse() {
+
+    sealed class StatusType {
+        class Started(val startTimestamp: Long) : StatusType()
+        class Missed(val initiationTimestamp: Long) : StatusType()
+        class Ended(val endTimestamp: Long) : StatusType()
+    }
+}
+
+data class MedicalRecordsAccessChangedMessageResponse(
+        override val uuid: String,
+        override val recipientEmail: String,
+        override val sendingTimestamp: Long,
+        val isAllowed: Boolean,
+        val patientUuid: String,
+        val medicalRecordAccessData: MedicalRecordAccessData
+) : SystemMessageResponse() {
+
+    sealed class MedicalRecordAccessData {
+        object AllRecordsAccessData : MedicalRecordAccessData()
+        class SomeRecordsAccessData(val medicalRecordUuids: List<String>) : MedicalRecordAccessData()
+    }
+}
+
+
+data class DocumentMessageResponse(
+        override val uuid: String,
+        override val senderEmail: String,
+        override val recipientEmail: String,
+        override val sendingTimestamp: Long,
+        val documentUuid: String
+) : UserMessageResponse()

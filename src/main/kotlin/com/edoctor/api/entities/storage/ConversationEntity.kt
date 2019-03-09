@@ -8,19 +8,19 @@ import javax.persistence.*
 @NoArg
 @Entity
 @Table(name = "conversations", uniqueConstraints = [UniqueConstraint(columnNames = ["patientUuid", "doctorUuid"])])
-class Conversation constructor(
+class ConversationEntity constructor(
 
         givenUuid: UUID?,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "patientUuid", nullable = false)
-        val patient: Patient,
+        val patient: PatientEntity,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "doctorUuid", nullable = false)
-        val doctor: Doctor,
+        val doctor: DoctorEntity,
 
         @OneToMany(mappedBy = "conversation", cascade = [CascadeType.ALL])
-        val messages: MutableList<Message>
+        val messages: MutableList<MessageEntity>
 
 ) : RandomUuidEntity(givenUuid)

@@ -8,21 +8,27 @@ import javax.persistence.*
 @NoArg
 @Entity
 @Table(name = "messages")
-class Message constructor(
+class MessageEntity constructor(
 
         givenUuid: UUID?,
 
         @Column(nullable = false)
         val timestamp: Long,
 
-        @Column(nullable = false)
-        val text: String,
+        @Column(nullable = true)
+        val text: String? = null,
+
+        @Column(nullable = true)
+        val callStatus: Int? = null,
+
+        @Column(nullable = true)
+        val callUuid: String? = null,
 
         @Column(nullable = false)
         val isFromPatient: Boolean,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "conversationUuid", nullable = false)
-        val conversation: Conversation
+        val conversation: ConversationEntity
 
 ) : RandomUuidEntity(givenUuid)

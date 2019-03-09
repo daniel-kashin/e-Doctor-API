@@ -1,13 +1,13 @@
 package com.edoctor.api.mapper
 
-import com.edoctor.api.entities.storage.Doctor
-import com.edoctor.api.entities.storage.Patient
-import com.edoctor.api.entities.network.UserResult as NetworkUser
+import com.edoctor.api.entities.storage.DoctorEntity
+import com.edoctor.api.entities.storage.PatientEntity
+import com.edoctor.api.entities.network.response.UserResponse as NetworkUser
 
 object UserMapper {
 
-    fun toNetwork(user: Patient): NetworkUser = user.run { NetworkUser(uuid, email, true) }
+    fun toNetwork(user: PatientEntity): NetworkUser = user.run { NetworkUser(uuid, email, true) }
 
-    fun toNetwork(user: Doctor): NetworkUser = user.run { NetworkUser(uuid, email, false) }
+    fun toNetwork(user: DoctorEntity): NetworkUser = user.run { NetworkUser(uuid, email, false) }
 
 }

@@ -7,7 +7,7 @@ import javax.persistence.MappedSuperclass
 
 @NoArg
 @MappedSuperclass
-abstract class User(
+abstract class UserEntity(
 
         givenUuid: UUID?,
 
