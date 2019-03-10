@@ -4,6 +4,7 @@ import com.edoctor.api.entities.storage.ConversationEntity
 import com.edoctor.api.entities.storage.MessageEntity
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
+import com.edoctor.api.repositories.MessagesRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,9 @@ class ConversationService {
 
     @Autowired
     private lateinit var conversationRepository: ConversationRepository
+
+    @Autowired
+    private lateinit var messageRepository: MessagesRepository
 
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
@@ -53,8 +57,10 @@ class ConversationService {
             messageEntity: MessageEntity,
             conversationEntity: ConversationEntity
     ) {
-        conversationEntity.messages.add(messageEntity)
-        conversationRepository.save(conversationEntity)
+        if (!conversationRepository.existsById(conversationEntity.id)) {
+            conversationRepository.save(conversationEntity)
+        }
+        messageRepository.save(messageEntity)
     }
 
 }
