@@ -60,6 +60,7 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
                 .checkTokenAccess("isAuthenticated()")
     }
 
+    // TODO: replace with Jdbc
     @Bean
     fun tokenStore(): TokenStore = InMemoryTokenStore()
 
