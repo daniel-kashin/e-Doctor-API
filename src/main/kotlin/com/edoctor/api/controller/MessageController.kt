@@ -3,8 +3,8 @@ package com.edoctor.api.controller
 import com.edoctor.api.entities.network.response.MessagesResponse
 import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.PatientEntity
-import com.edoctor.api.mapper.MessageMapper.toNetwork
-import com.edoctor.api.mapper.MessageMapper.wrapResult
+import com.edoctor.api.mapper.MessageMapper.toResponse
+import com.edoctor.api.mapper.MessageMapper.wrapResponse
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.MessagesRepository
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class MessagesController {
+class MessageController {
 
     private val log = KotlinLogging.logger { }
 
@@ -53,14 +53,14 @@ class MessagesController {
         val doctorEmail = user.takeIf { it is DoctorEntity }?.email ?: recipientEmail
 
         val conversation = conversationRepository.findByPatientEmailAndDoctorEmail(patientEmail, doctorEmail)
-                ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+                ?: return ResponseEntity.ok(MessagesResponse(emptyList()))
 
         val messages = messagesRepository
                 .findByTimestampGreaterThanAndConversationUuidOrderByTimestamp(
                         fromTimestamp,
                         conversation.uuid
                 )
-                .mapNotNull { wrapResult(toNetwork(it, patientEmail, doctorEmail)) }
+                .mapNotNull { wrapResponse(toResponse(it, patientEmail, doctorEmail)) }
 
         return ResponseEntity.ok(MessagesResponse(messages))
     }

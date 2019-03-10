@@ -28,12 +28,12 @@ object MessageMapper {
     fun unwrapRequest(
             messageRequestWrapper: MessageRequestWrapper
     ): MessageRequest? = when {
-        messageRequestWrapper.textMessageResult != null -> messageRequestWrapper.textMessageResult
+        messageRequestWrapper.textMessageRequest != null -> messageRequestWrapper.textMessageRequest
         messageRequestWrapper.callActionMessageRequest != null -> messageRequestWrapper.callActionMessageRequest
         else -> null
     }
 
-    fun wrapResult(
+    fun wrapResponse(
             messageResponse: MessageResponse?
     ): MessageResponseWrapper? = when (messageResponse) {
         is TextMessageResponse -> MessageResponseWrapper(textMessageResponse = messageResponse)
@@ -54,7 +54,7 @@ object MessageMapper {
         return CallActionRequest(callAction, callUuid)
     }
 
-    fun toNetwork(
+    fun toResponse(
             messageEntity: MessageEntity,
             patientEmail: String,
             doctorEmail: String
@@ -86,7 +86,6 @@ object MessageMapper {
                 conversation = conversation
         )
     }
-
 
     fun toEntityCallAction(
             callActionStatusResponse: CallStatusResponse,

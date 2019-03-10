@@ -3,8 +3,8 @@ package com.edoctor.api.controller
 import com.edoctor.api.entities.network.response.ConversationsResponse
 import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.PatientEntity
-import com.edoctor.api.mapper.MessageMapper.toNetwork
-import com.edoctor.api.mapper.MessageMapper.wrapResult
+import com.edoctor.api.mapper.MessageMapper.toResponse
+import com.edoctor.api.mapper.MessageMapper.wrapResponse
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
@@ -40,18 +40,15 @@ class ConversationController {
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val conversations = when (user) {
-            is PatientEntity -> user.conversations.mapNotNull {
-                toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
-            }
-            is DoctorEntity -> user.conversations.mapNotNull {
-                toNetwork(it.messages.first(), it.patient.email, it.doctor.email)
-            }
+            is PatientEntity -> user.conversations
+            is DoctorEntity -> user.conversations
             else -> throw IllegalStateException()
         }
 
         val sortedConversations = conversations
+                .mapNotNull { toResponse(it.messages.first(), it.patient.email, it.doctor.email) }
                 .sortedByDescending { it.sendingTimestamp }
-                .mapNotNull { wrapResult(it) }
+                .mapNotNull { wrapResponse(it) }
 
         return ResponseEntity.ok(ConversationsResponse(sortedConversations))
     }
