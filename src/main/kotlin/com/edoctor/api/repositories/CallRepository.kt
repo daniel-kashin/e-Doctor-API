@@ -7,9 +7,13 @@ import com.edoctor.api.entities.domain.CallActionRequest.CallAction.*
 import com.edoctor.api.entities.domain.CallStatusResponse
 import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus
 import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus.*
+import mu.KotlinLogging.logger
 
+// TODO: add call expiration
 @Repository
 class CallRepository {
+
+    private val log = logger { }
 
     private val conversationsToCalls: MutableMap<Call, CallStatus> = hashMapOf()
 
@@ -17,6 +21,8 @@ class CallRepository {
             patientEmail: String,
             doctorEmail: String
     ): Call? {
+        log.info { "findActiveCall($patientEmail, $doctorEmail)" }
+
         return conversationsToCalls
                 .entries
                 .firstOrNull {
@@ -33,7 +39,9 @@ class CallRepository {
             call.patientEmail,
             call.doctorEmail,
             call.isFromPatient
-    )
+    ).also {
+        log.info { "onCallActionRequest($callAction, $call)" }
+    }
 
     fun onCallActionRequest(
             callActionRequest: CallActionRequest,
@@ -49,7 +57,9 @@ class CallRepository {
                     val call = Call(callActionRequest.callUuid, patientEmail, doctorEmail, isPatient)
                     conversationsToCalls[call] = INITIATED
                     CallStatusResponse(INITIATED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                            .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                 } else {
+                    log.info { "onResponse(request = $callActionRequest, response = null)" }
                     null
                 }
             }
@@ -59,10 +69,13 @@ class CallRepository {
                         val call = currentCallToInfo.key
                         conversationsToCalls[call] = STARTED
                         CallStatusResponse(STARTED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                                .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                     } else {
+                        log.info { "onResponse(request = $callActionRequest, response = null)" }
                         null
                     }
                 } else {
+                    log.info { "onResponse(request = $callActionRequest, response = null)" }
                     null
                 }
             }
@@ -71,7 +84,9 @@ class CallRepository {
                     val call = currentCallToInfo.key
                     conversationsToCalls[call] = CANCELLED
                     CallStatusResponse(CANCELLED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                            .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                 } else {
+                    log.info { "onResponse(request = $callActionRequest, response = null)" }
                     null
                 }
             }
