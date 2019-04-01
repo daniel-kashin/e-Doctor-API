@@ -20,6 +20,9 @@ abstract class UserEntity(
         @Column(nullable = true)
         var dateOfBirthTimestamp: Long?,
 
+        @Column(nullable = true)
+        var isMale: Boolean?,
+
         @Column(nullable = false, unique = true)
         val email: String,
 

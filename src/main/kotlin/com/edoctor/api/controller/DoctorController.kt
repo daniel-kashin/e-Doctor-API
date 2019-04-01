@@ -22,7 +22,15 @@ class DoctorController {
         val doctorEntities = doctorRepository.findByEmailContainingIgnoreCase(textToSearch)
 
         return ResponseEntity.ok(
-                DoctorsResponse(doctorEntities.map { DoctorResponse(it.email, it.city, it.fullName) })
+                DoctorsResponse(doctorEntities.map {
+                    DoctorResponse(
+                            it.email,
+                            it.city,
+                            it.fullName,
+                            it.dateOfBirthTimestamp,
+                            it.isMale
+                    )
+                })
         )
     }
 

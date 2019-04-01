@@ -11,13 +11,25 @@ object UserMapper {
 
     fun toNetwork(user: PatientEntity): UserResponseWrapper = user.run {
         UserResponseWrapper(
-                patientResponse = PatientResponse(email = email, city = city, fullName = fullName)
+                patientResponse = PatientResponse(
+                        email = email,
+                        city = city,
+                        fullName = fullName,
+                        dateOfBirthTimestamp = dateOfBirthTimestamp,
+                        isMale = isMale
+                )
         )
     }
 
     fun toNetwork(user: DoctorEntity): UserResponseWrapper = user.run {
         UserResponseWrapper(
-                doctorResponse = DoctorResponse(email = email, city = city, fullName = fullName)
+                doctorResponse = DoctorResponse(
+                        email = email,
+                        city = city,
+                        fullName = fullName,
+                        dateOfBirthTimestamp = dateOfBirthTimestamp,
+                        isMale = isMale
+                )
         )
     }
 

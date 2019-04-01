@@ -62,6 +62,7 @@ class AccountController {
                     fullName = requestPatient.fullName
                     city = requestPatient.city
                     dateOfBirthTimestamp = requestPatient.dateOfBirthTimestamp
+                    isMale = requestPatient.isMale
                 }
                 patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
@@ -78,6 +79,7 @@ class AccountController {
                     fullName = requestDoctor.fullName
                     city = requestDoctor.city
                     dateOfBirthTimestamp = requestDoctor.dateOfBirthTimestamp
+                    isMale = requestDoctor.isMale
                 }
                 doctorRepository.save(newDoctor)
                 ResponseEntity.ok(toNetwork(newDoctor))
