@@ -1,6 +1,7 @@
 package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.response.UserResponseWrapper
+import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.PatientEntity
 import com.edoctor.api.mapper.UserMapper.toNetwork
 import com.edoctor.api.repositories.DoctorRepository
@@ -60,6 +61,7 @@ class AccountController {
                 val newPatient = patient.run {
                     PatientEntity(originalUuid, requestPatient.fullName, requestPatient.city, email, password, conversations)
                 }
+                patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
             }
         }
@@ -70,10 +72,11 @@ class AccountController {
             return if (requestDoctor == null || requestDoctor.email != doctor.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
-                val newPatient = doctor.run {
-                    PatientEntity(originalUuid, requestDoctor.fullName, requestDoctor.city, email, password, conversations)
+                val newDoctor = doctor.run {
+                    DoctorEntity(originalUuid, requestDoctor.fullName, requestDoctor.city, email, password, conversations)
                 }
-                ResponseEntity.ok(toNetwork(newPatient))
+                doctorRepository.save(newDoctor)
+                ResponseEntity.ok(toNetwork(newDoctor))
             }
         }
 
