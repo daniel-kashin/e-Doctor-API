@@ -9,9 +9,11 @@ import javax.persistence.*
 @MappedSuperclass
 abstract class RandomUuidEntity(givenId: UUID? = null) : Persistable<String> {
 
+    val originalUuid: UUID = givenId ?: UUID.randomUUID()
+
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    val uuid: String = (givenId ?: UUID.randomUUID()).toString()
+    val uuid: String = originalUuid.toString()
 
     @Transient
     private var persisted: Boolean = givenId != null
