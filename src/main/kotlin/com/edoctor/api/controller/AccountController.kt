@@ -61,6 +61,7 @@ class AccountController {
                 val newPatient = patient.apply {
                     fullName = requestPatient.fullName
                     city = requestPatient.city
+                    dateOfBirthTimestamp = requestPatient.dateOfBirthTimestamp
                 }
                 patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
@@ -76,6 +77,7 @@ class AccountController {
                 val newDoctor = doctor.apply {
                     fullName = requestDoctor.fullName
                     city = requestDoctor.city
+                    dateOfBirthTimestamp = requestDoctor.dateOfBirthTimestamp
                 }
                 doctorRepository.save(newDoctor)
                 ResponseEntity.ok(toNetwork(newDoctor))

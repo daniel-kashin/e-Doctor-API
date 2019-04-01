@@ -17,6 +17,9 @@ abstract class UserEntity(
         @Column(nullable = true)
         var city: String?,
 
+        @Column(nullable = true)
+        var dateOfBirthTimestamp: Long?,
+
         @Column(nullable = false, unique = true)
         val email: String,
 

@@ -16,6 +16,8 @@ class DoctorEntity constructor(
 
         city: String?,
 
+        dateOfBirthTimestamp: Long?,
+
         email: String,
 
         password: String,
@@ -23,4 +25,4 @@ class DoctorEntity constructor(
         @OneToMany(mappedBy = "doctor", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         val conversations: MutableSet<ConversationEntity>
 
-) : UserEntity(givenUuid, fullName, city, email, password)
+) : UserEntity(givenUuid, fullName, city, dateOfBirthTimestamp, email, password)
