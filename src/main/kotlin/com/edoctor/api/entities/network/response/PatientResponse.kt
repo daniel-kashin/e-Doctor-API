@@ -1,7 +1,7 @@
 package com.edoctor.api.entities.network.response
 
-data class DoctorResponse(
-        override val email: String,
+data class PatientResponse(
         override val city: String?,
+        override val email: String,
         override val fullName: String?
-) : UserResponse()
+): UserResponse()

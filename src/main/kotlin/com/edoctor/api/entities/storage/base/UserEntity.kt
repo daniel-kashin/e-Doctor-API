@@ -11,6 +11,12 @@ abstract class UserEntity(
 
         givenUuid: UUID?,
 
+        @Column(nullable = true)
+        val fullName: String?,
+
+        @Column(nullable = true)
+        val city: String?,
+
         @Column(nullable = false, unique = true)
         val email: String,
 
