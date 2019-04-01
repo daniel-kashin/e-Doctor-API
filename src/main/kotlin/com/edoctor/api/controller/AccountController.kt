@@ -58,8 +58,9 @@ class AccountController {
             return if (requestPatient == null || requestPatient.email != patient.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
-                val newPatient = patient.run {
-                    PatientEntity(originalUuid, requestPatient.fullName, requestPatient.city, email, password, conversations)
+                val newPatient = patient.apply {
+                    fullName = requestPatient.fullName
+                    city = requestPatient.city
                 }
                 patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
@@ -72,8 +73,9 @@ class AccountController {
             return if (requestDoctor == null || requestDoctor.email != doctor.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
-                val newDoctor = doctor.run {
-                    DoctorEntity(originalUuid, requestDoctor.fullName, requestDoctor.city, email, password, conversations)
+                val newDoctor = doctor.apply {
+                    fullName = requestDoctor.fullName
+                    city = requestDoctor.city
                 }
                 doctorRepository.save(newDoctor)
                 ResponseEntity.ok(toNetwork(newDoctor))

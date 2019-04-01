@@ -12,10 +12,10 @@ abstract class UserEntity(
         givenUuid: UUID?,
 
         @Column(nullable = true)
-        val fullName: String?,
+        var fullName: String?,
 
         @Column(nullable = true)
-        val city: String?,
+        var city: String?,
 
         @Column(nullable = false, unique = true)
         val email: String,
