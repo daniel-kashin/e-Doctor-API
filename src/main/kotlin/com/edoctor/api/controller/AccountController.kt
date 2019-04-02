@@ -1,8 +1,6 @@
 package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.response.UserResponseWrapper
-import com.edoctor.api.entities.storage.DoctorEntity
-import com.edoctor.api.entities.storage.PatientEntity
 import com.edoctor.api.mapper.UserMapper.toNetwork
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
@@ -12,10 +10,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 class AccountController {
@@ -48,13 +44,14 @@ class AccountController {
     @PostMapping("/account")
     fun updateAccount(
             authentication: OAuth2Authentication,
-            @RequestBody userRequesWrapper: UserResponseWrapper
+            @RequestPart("userRequest", required = true) userRequestWrapper: UserResponseWrapper,
+            @RequestPart("image", required = false) image: MultipartFile?
     ): ResponseEntity<UserResponseWrapper> {
         val principal = authentication.principal as User
 
         val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
         if (patient != null) {
-            val requestPatient = userRequesWrapper.patientResponse
+            val requestPatient = userRequestWrapper.patientResponse
             return if (requestPatient == null || requestPatient.email != patient.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
@@ -71,7 +68,7 @@ class AccountController {
 
         val doctor = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
         if (doctor != null) {
-            val requestDoctor = userRequesWrapper.doctorResponse
+            val requestDoctor = userRequestWrapper.doctorResponse
             return if (requestDoctor == null || requestDoctor.email != doctor.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
