@@ -1,6 +1,7 @@
 package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.response.UserResponseWrapper
+import com.edoctor.api.files.ImageFilesStorage
 import com.edoctor.api.mapper.UserMapper.toNetwork
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.UUID.randomUUID
 
 @RestController
 class AccountController {
@@ -23,6 +25,9 @@ class AccountController {
 
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
+
+    @Autowired
+    private lateinit var imageFilesStorage: ImageFilesStorage
 
     @GetMapping("/account")
     fun getAccount(authentication: OAuth2Authentication): ResponseEntity<UserResponseWrapper> {
@@ -55,11 +60,13 @@ class AccountController {
             return if (requestPatient == null || requestPatient.email != patient.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
+                val newImageUuid = updateImageInStorage(patient.imageUuid, image)
                 val newPatient = patient.apply {
                     fullName = requestPatient.fullName
                     city = requestPatient.city
                     dateOfBirthTimestamp = requestPatient.dateOfBirthTimestamp
                     isMale = requestPatient.isMale
+//                    newImageUuid?.let { imageUuid = it }
                 }
                 patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
@@ -72,11 +79,13 @@ class AccountController {
             return if (requestDoctor == null || requestDoctor.email != doctor.email) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
+                val newImageUuid = updateImageInStorage(doctor.imageUuid, image)
                 val newDoctor = doctor.apply {
                     fullName = requestDoctor.fullName
                     city = requestDoctor.city
                     dateOfBirthTimestamp = requestDoctor.dateOfBirthTimestamp
                     isMale = requestDoctor.isMale
+//                    newImageUuid?.let { imageUuid = it }
                 }
                 doctorRepository.save(newDoctor)
                 ResponseEntity.ok(toNetwork(newDoctor))
@@ -84,6 +93,20 @@ class AccountController {
         }
 
         return ResponseEntity(HttpStatus.UNAUTHORIZED)
+    }
+
+    private fun updateImageInStorage(oldImageUuid: String?, image: MultipartFile?): String? {
+        return if (image != null) {
+            oldImageUuid?.let {
+                imageFilesStorage.removeImageFile(it)
+            }
+
+            val newImageUuid = randomUUID().toString()
+            imageFilesStorage.saveImageFile(newImageUuid, image.inputStream)
+            newImageUuid
+        } else {
+            null
+        }
     }
 
 
