@@ -42,10 +42,6 @@ class AuthorizationController {
         val user: UserResponseWrapper = if (loginRequest.isPatient) {
             PatientEntity(
                     givenUuid = randomUUID(),
-                    fullName = null,
-                    city = null,
-                    dateOfBirthTimestamp = null,
-                    isMale = null,
                     email = loginRequest.email,
                     password = loginRequest.password,
                     conversations = mutableSetOf()
@@ -57,10 +53,6 @@ class AuthorizationController {
         } else {
             DoctorEntity(
                     givenUuid = randomUUID(),
-                    fullName = null,
-                    city = null,
-                    isMale = null,
-                    dateOfBirthTimestamp = null,
                     email = loginRequest.email,
                     password = loginRequest.password,
                     conversations = mutableSetOf()

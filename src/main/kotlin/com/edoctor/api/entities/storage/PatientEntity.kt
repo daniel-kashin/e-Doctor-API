@@ -12,13 +12,15 @@ class PatientEntity constructor(
 
         givenUuid: UUID?,
 
-        fullName: String?,
+        fullName: String? = null,
 
-        city: String?,
+        city: String? = null,
 
-        dateOfBirthTimestamp: Long?,
+        dateOfBirthTimestamp: Long? = null,
 
-        isMale: Boolean?,
+        isMale: Boolean? = null,
+
+        imageName: String? = null,
 
         email: String,
 
@@ -27,4 +29,4 @@ class PatientEntity constructor(
         @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         val conversations: MutableSet<ConversationEntity>
 
-) : UserEntity(givenUuid, fullName, city, dateOfBirthTimestamp, isMale, email, password)
+) : UserEntity(givenUuid, fullName, city, dateOfBirthTimestamp, isMale, imageName, email, password)

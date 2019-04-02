@@ -23,6 +23,9 @@ abstract class UserEntity(
         @Column(nullable = true)
         var isMale: Boolean?,
 
+        @Column(nullable = true)
+        var imageName: String?,
+
         @Column(nullable = false, unique = true)
         val email: String,
 
