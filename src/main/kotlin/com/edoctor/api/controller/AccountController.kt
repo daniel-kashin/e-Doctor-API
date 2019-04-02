@@ -6,19 +6,23 @@ import com.edoctor.api.mapper.UserMapper.toNetwork
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging
+import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.util.UUID.randomUUID
+import java.util.*
 
 @RestController
 class AccountController {
 
-    private val log = KotlinLogging.logger { }
+    private val log = logger { }
 
     @Autowired
     private lateinit var patientRepository: PatientRepository
@@ -66,7 +70,7 @@ class AccountController {
                     city = requestPatient.city
                     dateOfBirthTimestamp = requestPatient.dateOfBirthTimestamp
                     isMale = requestPatient.isMale
-//                    newImageUuid?.let { imageUuid = it }
+                    newImageUuid?.let { imageUuid = it }
                 }
                 patientRepository.save(newPatient)
                 ResponseEntity.ok(toNetwork(newPatient))
@@ -85,7 +89,7 @@ class AccountController {
                     city = requestDoctor.city
                     dateOfBirthTimestamp = requestDoctor.dateOfBirthTimestamp
                     isMale = requestDoctor.isMale
-//                    newImageUuid?.let { imageUuid = it }
+                    newImageUuid?.let { imageUuid = it }
                 }
                 doctorRepository.save(newDoctor)
                 ResponseEntity.ok(toNetwork(newDoctor))
@@ -101,7 +105,7 @@ class AccountController {
                 imageFilesStorage.removeImageFile(it)
             }
 
-            val newImageUuid = randomUUID().toString()
+            val newImageUuid = UUID.randomUUID().toString()
             imageFilesStorage.saveImageFile(newImageUuid, image.inputStream)
             newImageUuid
         } else {

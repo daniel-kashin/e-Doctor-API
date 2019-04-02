@@ -8,5 +8,6 @@ data class PatientResponse(
         override val fullName: String?,
         override val dateOfBirthTimestamp: Long?,
         @get:JsonProperty("isMale")
-        override val isMale: Boolean?
+        override val isMale: Boolean?,
+        override val relativeImageUrl: String?
 ) : UserResponse()

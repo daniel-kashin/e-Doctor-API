@@ -16,7 +16,8 @@ object UserMapper {
                         city = city,
                         fullName = fullName,
                         dateOfBirthTimestamp = dateOfBirthTimestamp,
-                        isMale = isMale
+                        isMale = isMale,
+                        relativeImageUrl = toRelativeImageUrl(imageUuid)
                 )
         )
     }
@@ -28,9 +29,12 @@ object UserMapper {
                         city = city,
                         fullName = fullName,
                         dateOfBirthTimestamp = dateOfBirthTimestamp,
-                        isMale = isMale
+                        isMale = isMale,
+                        relativeImageUrl = toRelativeImageUrl(imageUuid)
                 )
         )
     }
+
+    private fun toRelativeImageUrl(imageUuid: String?): String? = imageUuid?.let { "/images/$it" }
 
 }

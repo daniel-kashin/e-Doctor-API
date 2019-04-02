@@ -37,6 +37,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .and()
                 .ignoring()
                 .antMatchers("/login")
+                .and()
+                .ignoring()
+                .antMatchers("/images/*")
     }
 
     @Autowired
