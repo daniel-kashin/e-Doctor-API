@@ -35,7 +35,9 @@ class AuthorizationController {
 
     @PostMapping("/register")
     fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResponseWrapper> {
-        if (patientRepository.existsByEmail(loginRequest.email) || doctorRepository.existsByEmail(loginRequest.email)) {
+        if (patientRepository.existsByEmail(loginRequest.email)
+                || doctorRepository.existsByEmail(loginRequest.email)
+        ) {
             return ResponseEntity(HttpStatus.CONFLICT)
         }
 
@@ -43,7 +45,7 @@ class AuthorizationController {
             PatientEntity(
                     givenUuid = randomUUID(),
                     email = loginRequest.email,
-                    password = loginRequest.password,
+                    password = passwordEncoder.encode(loginRequest.password),
                     conversations = mutableSetOf()
             ).let {
                 log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
@@ -54,7 +56,7 @@ class AuthorizationController {
             DoctorEntity(
                     givenUuid = randomUUID(),
                     email = loginRequest.email,
-                    password = loginRequest.password,
+                    password = passwordEncoder.encode(loginRequest.password),
                     conversations = mutableSetOf()
             ).let {
                 log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }

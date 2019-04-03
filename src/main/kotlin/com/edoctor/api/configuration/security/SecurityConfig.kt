@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.config.annotation.web.builders.WebSecurity
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider
+
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +26,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
+
+    @Autowired
+    private lateinit var authenticationProvider: DaoAuthenticationProvider
 
     override fun configure(http: HttpSecurity) {
         http
@@ -47,13 +53,21 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         auth
                 .userDetailsService<UserDetailsRepository>(userDetailsRepository)
                 .passwordEncoder(passwordEncoder)
+                .and()
+                .authenticationProvider(authenticationProvider)
     }
 
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
 
-    // TODO: replace with encoder
     @Bean
-    fun passwordEncoder(): PasswordEncoder = NoOpPasswordEncoder.getInstance()
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+    @Bean
+    fun authenticationProvider() = DaoAuthenticationProvider()
+            .apply {
+                setUserDetailsService(userDetailsRepository)
+                setPasswordEncoder(passwordEncoder)
+            }
 
 }

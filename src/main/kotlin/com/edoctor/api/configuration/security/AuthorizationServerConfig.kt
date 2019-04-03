@@ -7,6 +7,8 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.crypto.password.NoOpPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
@@ -45,7 +47,6 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
                 .authorizedGrantTypes(KEY_TYPE_PASSWORD, KEY_AUTHORIZATION_CODE, KEY_REFRESH_TOKEN, KEY_IMPLICIT)
                 .scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
                 .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
-
     }
 
     override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
@@ -58,6 +59,7 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         oauthServer
                 .tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()")
+                .passwordEncoder(NoOpPasswordEncoder.getInstance())
     }
 
     // TODO: replace with Jdbc
