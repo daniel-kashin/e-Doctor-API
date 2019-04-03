@@ -23,6 +23,27 @@ class DoctorEntity constructor(
 
         imageName: String? = null,
 
+        @Column(nullable = true)
+        var yearsOfExperience: Int? = null,
+
+        @Column(nullable = true)
+        var category: Int? = null,
+
+        @Column(nullable = true)
+        var specialization: String? = null,
+
+        @Column(nullable = true)
+        var clinicalInterests: String? = null,
+
+        @Column(nullable = true)
+        var education: String? = null,
+
+        @Column(nullable = true)
+        var workExperience: String? = null,
+
+        @Column(nullable = true)
+        var trainings: String? = null,
+
         email: String,
 
         password: String,

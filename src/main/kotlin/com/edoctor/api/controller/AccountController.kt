@@ -89,6 +89,13 @@ class AccountController {
                     city = requestDoctor.city
                     dateOfBirthTimestamp = requestDoctor.dateOfBirthTimestamp
                     isMale = requestDoctor.isMale
+                    yearsOfExperience = requestDoctor.yearsOfExperience
+                    category = requestDoctor.category
+                    specialization = requestDoctor.specialization
+                    clinicalInterests = requestDoctor.clinicalInterests
+                    workExperience = requestDoctor.workExperience
+                    education = requestDoctor.education
+                    trainings = requestDoctor.trainings
                     newImageUuid?.let { imageUuid = it }
                 }
                 doctorRepository.save(newDoctor)

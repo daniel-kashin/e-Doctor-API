@@ -30,7 +30,14 @@ object UserMapper {
                         fullName = fullName,
                         dateOfBirthTimestamp = dateOfBirthTimestamp,
                         isMale = isMale,
-                        relativeImageUrl = toRelativeImageUrl(imageUuid)
+                        relativeImageUrl = toRelativeImageUrl(imageUuid),
+                        yearsOfExperience = yearsOfExperience,
+                        category = category,
+                        specialization = specialization,
+                        clinicalInterests = clinicalInterests,
+                        workExperience = workExperience,
+                        education = education,
+                        trainings = trainings
                 )
         )
     }
