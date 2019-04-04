@@ -1,10 +1,10 @@
-package com.edoctor.api.entities.medicalrecord
+package com.edoctor.api.entities.network.model.record
 
 data class Vaccination(
         override val uuid: String,
-        override val timestamp: Long,
+        override val measurementTimestamp: Long,
         override val clinic: String?,
         override val doctor: String?,
         override val comment: String?,
         val name: String
-) : MedicalRecord(), DateSpecific, DoctorSpecific, ClinicSpecific, Commentable
+) : MedicalRecordModel(), DateSpecific, DoctorSpecific, ClinicSpecific, Commentable

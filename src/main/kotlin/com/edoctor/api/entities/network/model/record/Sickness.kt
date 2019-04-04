@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.medicalrecord
+package com.edoctor.api.entities.network.model.record
 
 class Sickness(
         override val comment: String?,

@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.medicalrecord
+package com.edoctor.api.entities.network.model.record
 
 class DoctorVisit(
         override val uuid: String,
@@ -8,4 +8,4 @@ class DoctorVisit(
         override val remindTimestamp: Long?,
         val diagnosis: String?,
         val recipe: String?
-) : MedicalRecord(), ClinicSpecific, DoctorSpecific, Commentable, Remindable
+) : MedicalRecordModel(), ClinicSpecific, DoctorSpecific, Commentable, Remindable

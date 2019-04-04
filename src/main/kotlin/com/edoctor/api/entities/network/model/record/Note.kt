@@ -1,7 +1,7 @@
-package com.edoctor.api.entities.medicalrecord
+package com.edoctor.api.entities.network.model.record
 
 class Note(
         override val uuid: String,
         override val comment: String?,
         override val remindTimestamp: Long?
-) : MedicalRecord(), Commentable, Remindable
+) : MedicalRecordModel(), Commentable, Remindable
