@@ -1,6 +1,6 @@
 package com.edoctor.api.entities.network.model.record
 
-abstract class BodyParameterModel : MedicalRecordModel(), DateSpecific
+sealed class BodyParameterModel : MedicalRecordModel(), DateSpecific
 
 data class HeightModel(
         override val uuid: String,

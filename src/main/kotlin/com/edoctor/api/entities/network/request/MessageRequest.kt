@@ -1,6 +1,6 @@
 package com.edoctor.api.entities.network.request
 
-abstract class MessageRequest
+sealed class MessageRequest
 
 data class CallActionMessageRequest(
     val callStatus: Int,
