@@ -22,6 +22,9 @@ class PatientEntity constructor(
 
         imageName: String? = null,
 
+        @Column(nullable = true)
+        var bloodGroup: Int? = null,
+
         email: String,
 
         password: String,

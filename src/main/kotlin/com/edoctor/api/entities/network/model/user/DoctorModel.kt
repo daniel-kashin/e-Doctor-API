@@ -1,8 +1,8 @@
-package com.edoctor.api.entities.network.response
+package com.edoctor.api.entities.network.model.user
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class DoctorResponse(
+data class DoctorModel(
         override val email: String,
         override val city: String?,
         override val fullName: String?,
@@ -17,4 +17,4 @@ data class DoctorResponse(
         val education: String?,
         val workExperience: String?,
         val trainings: String?
-) : UserResponse()
+) : UserModel()

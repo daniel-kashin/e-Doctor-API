@@ -5,8 +5,7 @@ import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.mapper.UserMapper
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.entities.storage.PatientEntity
-import com.edoctor.api.entities.network.response.UserResponse
-import com.edoctor.api.entities.network.response.UserResponseWrapper
+import com.edoctor.api.entities.network.model.user.UserModelWrapper
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,14 +33,14 @@ class AuthorizationController {
     private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/register")
-    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResponseWrapper> {
+    fun register(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserModelWrapper> {
         if (patientRepository.existsByEmail(loginRequest.email)
                 || doctorRepository.existsByEmail(loginRequest.email)
         ) {
             return ResponseEntity(HttpStatus.CONFLICT)
         }
 
-        val user: UserResponseWrapper = if (loginRequest.isPatient) {
+        val user: UserModelWrapper = if (loginRequest.isPatient) {
             PatientEntity(
                     givenUuid = randomUUID(),
                     email = loginRequest.email,
@@ -69,7 +68,7 @@ class AuthorizationController {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserResponseWrapper> {
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<UserModelWrapper> {
         return if (loginRequest.isPatient) {
             val patient = patientRepository.findByEmail(loginRequest.email)
                     ?: return ResponseEntity(HttpStatus.BAD_REQUEST)

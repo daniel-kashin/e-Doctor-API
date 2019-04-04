@@ -1,6 +1,6 @@
-package com.edoctor.api.entities.network.response
+package com.edoctor.api.entities.network.model.user
 
-abstract class UserResponse {
+abstract class UserModel {
     abstract val email: String
     abstract val fullName: String?
     abstract val city: String?

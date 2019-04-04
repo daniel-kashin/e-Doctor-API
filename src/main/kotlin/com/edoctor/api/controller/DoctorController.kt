@@ -23,7 +23,7 @@ class DoctorController {
 
         return ResponseEntity.ok(
                 DoctorsResponse(doctorEntities.mapNotNull {
-                    toNetwork(it).doctorResponse
+                    toNetwork(it).doctorModel
                 })
         )
     }
