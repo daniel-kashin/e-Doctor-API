@@ -1,22 +1,24 @@
 package com.edoctor.api.entities.network.response
 
+import com.edoctor.api.entities.network.model.user.UserModelWrapper
+
 sealed class MessageResponse {
     abstract val uuid: String
-    abstract val recipientEmail: String
+    abstract val recipientUser: UserModelWrapper
     abstract val sendingTimestamp: Long
 }
 
 sealed class SystemMessageResponse : MessageResponse()
 
 sealed class UserMessageResponse : MessageResponse() {
-    abstract val senderEmail: String
+    abstract val senderUser: UserModelWrapper
 }
 
 
 data class CallStatusMessageResponse(
         override val uuid: String,
-        override val senderEmail: String,
-        override val recipientEmail: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val callStatus: Int,
         val callUuid: String
@@ -32,9 +34,8 @@ data class CallStatusMessageResponse(
 
 data class TextMessageResponse(
         override val uuid: String,
-        // TODO: replace with uuid
-        override val senderEmail: String,
-        override val recipientEmail: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val text: String
 ) : UserMessageResponse()
@@ -45,7 +46,7 @@ data class TextMessageResponse(
 // TODO
 data class ConsultationStatusMessageResponse(
         override val uuid: String,
-        override val recipientEmail: String,
+        override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val initiatorUuid: String,
         val statusType: StatusType
@@ -60,7 +61,7 @@ data class ConsultationStatusMessageResponse(
 
 data class MedicalRecordsAccessChangedMessageResponse(
         override val uuid: String,
-        override val recipientEmail: String,
+        override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val isAllowed: Boolean,
         val patientUuid: String,
@@ -76,8 +77,8 @@ data class MedicalRecordsAccessChangedMessageResponse(
 
 data class DocumentMessageResponse(
         override val uuid: String,
-        override val senderEmail: String,
-        override val recipientEmail: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val documentUuid: String
 ) : UserMessageResponse()

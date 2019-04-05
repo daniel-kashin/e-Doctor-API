@@ -39,6 +39,12 @@ class ChatHandler : TextWebSocketHandler() {
     private lateinit var conversationService: ConversationService
 
     @Autowired
+    private lateinit var patientRepository: PatientRepository
+
+    @Autowired
+    private lateinit var doctorRepository: DoctorRepository
+
+    @Autowired
     private lateinit var callRepository: CallRepository
 
     var chatSessions: Map<WebSocketPrincipal, MutableList<WebSocketSession>> = ConcurrentHashMap()
@@ -71,10 +77,12 @@ class ChatHandler : TextWebSocketHandler() {
         when (messageRequest) {
             is TextMessageRequest -> {
                 val messageEntity = toEntityText(messageRequest, principal.isPatient, conversationEntity)
+                val patientEntity = patientRepository.findByEmail(principal.patientEmail)
+                val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail)
 
                 conversationService.addMessage(messageEntity, conversationEntity)
 
-                val messageResponse = wrapResponse(toResponse(messageEntity, principal.patientEmail, principal.doctorEmail))
+                val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity!!, doctorEntity!!))
                 val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
                 chatSessions.entries
@@ -105,10 +113,12 @@ class ChatHandler : TextWebSocketHandler() {
             callStatusResponse: CallStatusResponse
     ) {
         val messageEntity = toEntityCallAction(callStatusResponse, conversationEntity)
+        val patientEntity = patientRepository.findByEmail(principal.patientEmail)
+        val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail)
 
         conversationService.addMessage(messageEntity, conversationEntity)
 
-        val messageResponse = wrapResponse(toResponse(messageEntity, principal.patientEmail, principal.doctorEmail))
+        val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity!!, doctorEntity!!))
         val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
         chatSessions.entries

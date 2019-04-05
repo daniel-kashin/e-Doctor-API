@@ -49,10 +49,17 @@ class MessageController {
                 ?: doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        val patientEmail = user.takeIf { it is PatientEntity }?.email ?: recipientEmail
-        val doctorEmail = user.takeIf { it is DoctorEntity }?.email ?: recipientEmail
+        val (patientEntity, doctorEntity) = if (user is PatientEntity) {
+            val doctorEntity = doctorRepository.findByEmail(recipientEmail) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            user to doctorEntity
+        } else if (user is DoctorEntity) {
+            val patientEntity = patientRepository.findByEmail(recipientEmail) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            patientEntity to user
+        } else {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
 
-        val conversation = conversationRepository.findByPatientEmailAndDoctorEmail(patientEmail, doctorEmail)
+        val conversation = conversationRepository.findByPatientEmailAndDoctorEmail(patientEntity.email, doctorEntity.email)
                 ?: return ResponseEntity.ok(MessagesResponse(emptyList()))
 
         val messages = messagesRepository
@@ -60,7 +67,7 @@ class MessageController {
                         fromTimestamp,
                         conversation.uuid
                 )
-                .mapNotNull { wrapResponse(toResponse(it, patientEmail, doctorEmail)) }
+                .mapNotNull { wrapResponse(toResponse(it, patientEntity, doctorEntity)) }
 
         return ResponseEntity.ok(MessagesResponse(messages))
     }

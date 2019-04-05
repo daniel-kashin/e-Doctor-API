@@ -3,6 +3,8 @@ package com.edoctor.api.mapper
 import com.edoctor.api.entities.domain.CallActionRequest
 import com.edoctor.api.entities.domain.CallActionRequest.CallAction.*
 import com.edoctor.api.entities.domain.CallStatusResponse
+import com.edoctor.api.entities.network.model.user.DoctorModel
+import com.edoctor.api.entities.network.model.user.PatientModel
 import com.edoctor.api.entities.network.request.CallActionMessageRequest
 import com.edoctor.api.entities.network.request.CallActionMessageRequest.Companion.CALL_ACTION_ENTER
 import com.edoctor.api.entities.network.request.CallActionMessageRequest.Companion.CALL_ACTION_INITIATE
@@ -18,7 +20,10 @@ import com.edoctor.api.entities.network.response.MessageResponse
 import com.edoctor.api.entities.network.response.MessageResponseWrapper
 import com.edoctor.api.entities.network.response.TextMessageResponse
 import com.edoctor.api.entities.storage.ConversationEntity
+import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.MessageEntity
+import com.edoctor.api.entities.storage.PatientEntity
+import com.edoctor.api.mapper.UserMapper.toNetwork
 import com.edoctor.api.utils.currentUnixTime
 import java.lang.IllegalStateException
 import java.util.UUID.randomUUID
@@ -56,18 +61,18 @@ object MessageMapper {
 
     fun toResponse(
             messageEntity: MessageEntity,
-            patientEmail: String,
-            doctorEmail: String
+            patientEntity: PatientEntity,
+            doctorEntity: DoctorEntity
     ): MessageResponse? = messageEntity.run {
-        val senderEmail = if (isFromPatient) patientEmail else doctorEmail
-        val recipientEmail = if (isFromPatient) doctorEmail else patientEmail
+        val sender = if (isFromPatient) toNetwork(patientEntity) else toNetwork(doctorEntity)
+        val recipient = if (isFromPatient) toNetwork(doctorEntity) else toNetwork(patientEntity)
 
         return when {
             text != null -> {
-                TextMessageResponse(uuid, senderEmail, recipientEmail, timestamp, text)
+                TextMessageResponse(uuid, sender, recipient, timestamp, text)
             }
             callStatus != null && callUuid != null -> {
-                CallStatusMessageResponse(uuid, senderEmail, recipientEmail, timestamp, callStatus, callUuid)
+                CallStatusMessageResponse(uuid, sender, recipient, timestamp, callStatus, callUuid)
             }
             else -> null
         }
