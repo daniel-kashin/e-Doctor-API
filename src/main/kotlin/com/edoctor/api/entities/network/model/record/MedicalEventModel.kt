@@ -16,8 +16,8 @@ data class Allergy(
         override val timestamp: Long,
         override val comment: String?,
         val endTimestamp: Long?,
-        val allergenName: String?,
-        val reaction: String?
+        val allergenName: String,
+        val symptoms: String?
 ) : MedicalEventModel()
 
 data class Note(
@@ -53,6 +53,7 @@ data class DoctorVisit(
         override val clinic: String?,
         override val doctorName: String?,
         override val doctorSpecialization: String?,
+        val complaints: String?,
         val diagnosisAndRecommendations: String?,
         val recipe: String?
 ) : MedicalEventModel(), ClinicSpecific, DoctorSpecific
