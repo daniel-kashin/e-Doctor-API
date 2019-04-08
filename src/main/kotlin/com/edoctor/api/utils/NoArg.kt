@@ -5,4 +5,4 @@ import kotlin.annotation.Target
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class NoArg()
+annotation class NoArg

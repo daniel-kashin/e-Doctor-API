@@ -1,9 +1,15 @@
 package com.edoctor.api.entities.storage
 
 import com.edoctor.api.entities.storage.base.RandomUuidEntity
+import com.edoctor.api.utils.NoArg
 import java.util.*
 import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Table
 
+@NoArg
+@Entity
+@Table(name = "body_parameters")
 class BodyParameterEntity(
 
         givenUuid: UUID?,
