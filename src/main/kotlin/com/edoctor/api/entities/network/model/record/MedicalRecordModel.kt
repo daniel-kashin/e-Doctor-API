@@ -1,13 +1,11 @@
 package com.edoctor.api.entities.network.model.record
 
-// TODO: maybe use encapsulation instead of inheritance
-
 abstract class MedicalRecordModel {
     abstract val uuid: String
 }
 
 interface DateSpecific {
-    val measurementTimestamp: Long
+    val timestamp: Long
 }
 
 interface ClinicSpecific {
@@ -15,7 +13,8 @@ interface ClinicSpecific {
 }
 
 interface DoctorSpecific {
-    val doctor: String?
+    val doctorName: String?
+    val doctorSpecialization: String?
 }
 
 interface Commentable {
