@@ -9,7 +9,6 @@ import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus
 import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus.*
 import mu.KotlinLogging.logger
 
-// TODO: add call expiration
 @Repository
 class CallRepository {
 

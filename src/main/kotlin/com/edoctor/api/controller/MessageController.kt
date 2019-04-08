@@ -7,7 +7,7 @@ import com.edoctor.api.mapper.MessageMapper.toResponse
 import com.edoctor.api.mapper.MessageMapper.wrapResponse
 import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
-import com.edoctor.api.repositories.MessagesRepository
+import com.edoctor.api.repositories.MessageRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +25,7 @@ class MessageController {
     private val log = KotlinLogging.logger { }
 
     @Autowired
-    private lateinit var messagesRepository: MessagesRepository
+    private lateinit var messageRepository: MessageRepository
 
     @Autowired
     private lateinit var conversationRepository: ConversationRepository
@@ -62,7 +62,7 @@ class MessageController {
         val conversation = conversationRepository.findByPatientEmailAndDoctorEmail(patientEntity.email, doctorEntity.email)
                 ?: return ResponseEntity.ok(MessagesResponse(emptyList()))
 
-        val messages = messagesRepository
+        val messages = messageRepository
                 .findByTimestampGreaterThanAndConversationUuidOrderByTimestamp(
                         fromTimestamp,
                         conversation.uuid
