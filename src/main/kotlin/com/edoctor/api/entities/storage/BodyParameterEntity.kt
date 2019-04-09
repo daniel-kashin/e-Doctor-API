@@ -3,9 +3,7 @@ package com.edoctor.api.entities.storage
 import com.edoctor.api.entities.storage.base.RandomUuidEntity
 import com.edoctor.api.utils.NoArg
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
+import javax.persistence.*
 
 @NoArg
 @Entity
@@ -15,10 +13,14 @@ class BodyParameterEntity(
         givenUuid: UUID?,
 
         @Column(nullable = false)
-        var measurementTimestamp: Long,
+        val type: Int,
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "patientUuid", nullable = false)
+        val patient: PatientEntity,
 
         @Column(nullable = false)
-        val type: Int,
+        var measurementTimestamp: Long,
 
         @Column(nullable = false)
         var firstValue: Double,

@@ -6,8 +6,13 @@ import com.edoctor.api.entities.network.response.BodyParametersResponse
 import com.edoctor.api.mapper.BodyParameterMapper.toEntity
 import com.edoctor.api.mapper.BodyParameterMapper.toNetwork
 import com.edoctor.api.repositories.BodyParameterRepository
+import com.edoctor.api.repositories.PatientRepository
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,20 +21,33 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class ParametersController {
 
+    private val log = KotlinLogging.logger { }
+
     @Autowired
     private lateinit var bodyParameterRepository: BodyParameterRepository
 
+    @Autowired
+    private lateinit var patientRepository: PatientRepository
+
     @GetMapping("/latestParameters")
-    fun getLatestParametersOfEachType(): ResponseEntity<BodyParametersResponse> {
+    fun getLatestParametersOfEachType(
+            authentication: OAuth2Authentication
+    ): ResponseEntity<BodyParametersResponse> {
+        val principal = authentication.principal as User
+
+        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
         val distinctTypes = bodyParameterRepository.getDistinctTypes()
 
         val parameters = distinctTypes
                 .mapNotNull {
                     bodyParameterRepository
-                            .findTopByTypeAndCustomModelNameAndCustomModelUnitOrderByMeasurementTimestampDesc(
+                            .findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
                                     it.type,
                                     it.customModelName,
-                                    it.customModelUnit
+                                    it.customModelUnit,
+                                    user.uuid
                             )
                 }
                 .map { toNetwork(it) }
@@ -39,13 +57,20 @@ class ParametersController {
 
     @PostMapping("/parameters")
     fun getParameters(
-            @RequestBody type: BodyParameterTypeWrapper
+            @RequestBody type: BodyParameterTypeWrapper,
+            authentication: OAuth2Authentication
     ): ResponseEntity<BodyParametersResponse> {
+        val principal = authentication.principal as User
+
+        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
         val parameters = bodyParameterRepository
-                .findAllByTypeAndCustomModelNameAndCustomModelUnit(
+                .findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuid(
                         type.type,
                         type.customModelName,
-                        type.customModelUnit
+                        type.customModelUnit,
+                        user.uuid
                 )
                 .map { toNetwork(it) }
 
@@ -54,12 +79,18 @@ class ParametersController {
 
     @PostMapping("/addOrEditParameter")
     fun addOrEditParameter(
-            @RequestBody parameter: BodyParameterWrapper
+            @RequestBody parameter: BodyParameterWrapper,
+            authentication: OAuth2Authentication
     ): ResponseEntity<BodyParameterWrapper> {
-        val existing = bodyParameterRepository.findById(parameter.uuid).orElse(null)
+        val principal = authentication.principal as User
+
+        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val existing = bodyParameterRepository.findByUuidAndPatientUuid(parameter.uuid, user.uuid)
 
         if (existing == null) {
-            bodyParameterRepository.save(toEntity(parameter))
+            bodyParameterRepository.save(toEntity(parameter, user))
         } else {
             bodyParameterRepository.save(
                     existing.apply {
@@ -75,9 +106,15 @@ class ParametersController {
 
     @PostMapping("/deleteParameter")
     fun deleteParameter(
-            @RequestBody parameter: BodyParameterWrapper
+            @RequestBody parameter: BodyParameterWrapper,
+            authentication: OAuth2Authentication
     ): ResponseEntity<String> {
-        bodyParameterRepository.deleteById(parameter.uuid)
+        val principal = authentication.principal as User
+
+        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        bodyParameterRepository.deleteByUuidAndPatientUuid(parameter.uuid, user.uuid)
 
         return ResponseEntity.noContent().build()
     }

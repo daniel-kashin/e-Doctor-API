@@ -14,17 +14,28 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
             "GROUP BY e.type, e.customModelName, e.customModelUnit")
     fun getDistinctTypes(): List<BodyParameterEntityType>
 
-
-    fun findTopByTypeAndCustomModelNameAndCustomModelUnitOrderByMeasurementTimestampDesc(
+    fun findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
             type: Int,
             customModelName: String?,
-            customModelUnit: String?
+            customModelUnit: String?,
+            patientUuid: String
     ): BodyParameterEntity?
 
-    fun findAllByTypeAndCustomModelNameAndCustomModelUnit(
+    fun findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuid(
             type: Int,
             customModelName: String?,
-            customModelUnit: String?
+            customModelUnit: String?,
+            patientUuid: String
     ): List<BodyParameterEntity>
+
+    fun findByUuidAndPatientUuid(
+            uuid: String,
+            patientUuid: String
+    ): BodyParameterEntity?
+
+    fun deleteByUuidAndPatientUuid(
+            uuid: String,
+            patientUuid: String
+    )
 
 }
