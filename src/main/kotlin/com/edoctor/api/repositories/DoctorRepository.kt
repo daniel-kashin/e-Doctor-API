@@ -9,7 +9,10 @@ interface DoctorRepository : JpaRepository<DoctorEntity, String> {
 
     fun findByEmail(email: String) : DoctorEntity?
 
-    fun findByEmailContainingIgnoreCase(textToSearch: String): List<DoctorEntity>
+    fun findByFullNameIgnoreCaseContainingOrSpecializationIgnoreCaseContaining(
+            fullName: String,
+            specialization: String
+    ): List<DoctorEntity>
 
     fun existsByEmail(email: String) : Boolean
 
