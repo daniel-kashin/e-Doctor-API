@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -28,6 +29,7 @@ class MedicalEventsController {
     private lateinit var patientRepository: PatientRepository
 
     @GetMapping("/medicalEvents")
+    @Transactional
     fun getEvents(
             authentication: OAuth2Authentication
     ): ResponseEntity<MedicalEventsResponse> {
@@ -42,6 +44,7 @@ class MedicalEventsController {
     }
 
     @PostMapping("/addOrEditMedicalEvent")
+    @Transactional
     fun addOrEditMedicalEvent(
             @RequestBody event: MedicalEventWrapper,
             authentication: OAuth2Authentication
@@ -76,6 +79,7 @@ class MedicalEventsController {
     }
 
     @PostMapping("/deleteMedicalEvent")
+    @Transactional
     fun deleteParameter(
             @RequestBody event: MedicalEventWrapper,
             authentication: OAuth2Authentication

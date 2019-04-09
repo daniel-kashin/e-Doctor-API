@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -30,6 +31,7 @@ class ParametersController {
     private lateinit var patientRepository: PatientRepository
 
     @GetMapping("/latestParameters")
+    @Transactional
     fun getLatestParametersOfEachType(
             authentication: OAuth2Authentication
     ): ResponseEntity<BodyParametersResponse> {
@@ -56,6 +58,7 @@ class ParametersController {
     }
 
     @PostMapping("/parameters")
+    @Transactional
     fun getParameters(
             @RequestBody type: BodyParameterTypeWrapper,
             authentication: OAuth2Authentication
@@ -78,6 +81,7 @@ class ParametersController {
     }
 
     @PostMapping("/addOrEditParameter")
+    @Transactional
     fun addOrEditParameter(
             @RequestBody parameter: BodyParameterWrapper,
             authentication: OAuth2Authentication
@@ -105,6 +109,7 @@ class ParametersController {
     }
 
     @PostMapping("/deleteParameter")
+    @Transactional
     fun deleteParameter(
             @RequestBody parameter: BodyParameterWrapper,
             authentication: OAuth2Authentication
