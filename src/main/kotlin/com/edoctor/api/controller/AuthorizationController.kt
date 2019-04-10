@@ -47,7 +47,8 @@ class AuthorizationController {
                     password = passwordEncoder.encode(loginRequest.password),
                     conversations = mutableSetOf(),
                     medicalEvents = mutableSetOf(),
-                    bodyParameters = mutableSetOf()
+                    bodyParameters = mutableSetOf(),
+                    medicalAccesses = mutableSetOf()
             ).let {
                 log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
                 patientRepository.save(it)
@@ -58,7 +59,8 @@ class AuthorizationController {
                     givenUuid = randomUUID(),
                     email = loginRequest.email,
                     password = passwordEncoder.encode(loginRequest.password),
-                    conversations = mutableSetOf()
+                    conversations = mutableSetOf(),
+                    medicalAccesses = mutableSetOf()
             ).let {
                 log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }
                 doctorRepository.save(it)

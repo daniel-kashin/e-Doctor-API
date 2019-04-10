@@ -36,6 +36,9 @@ class PatientEntity constructor(
         val medicalEvents: MutableSet<MedicalEventEntity>,
 
         @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        val bodyParameters: MutableSet<BodyParameterEntity>
+        val bodyParameters: MutableSet<BodyParameterEntity>,
+
+        @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        val medicalAccesses: MutableSet<MedicalRecordAccessEntity>
 
 ) : UserEntity(givenUuid, fullName, city, dateOfBirthTimestamp, isMale, imageName, email, password)
