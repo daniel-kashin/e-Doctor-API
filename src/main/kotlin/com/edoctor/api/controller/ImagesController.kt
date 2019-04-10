@@ -27,7 +27,6 @@ class ImagesController {
         val imageBytes = imageFile.readBytes()
 
         val headers = HttpHeaders().apply {
-//            contentType = MediaType.IMAGE_PNG
             contentLength = imageBytes.size.toLong()
         }
 
