@@ -39,7 +39,7 @@ class DoctorController {
         return specialization != null && fullName != null &&
                 imageUuid != null && yearsOfExperience != null &&
                 city != null && workExperience != null &&
-                isMale != null
+                education != null && isMale != null
     }
 
 }
