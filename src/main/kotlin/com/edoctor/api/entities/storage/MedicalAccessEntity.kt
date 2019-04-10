@@ -7,8 +7,8 @@ import javax.persistence.*
 
 @NoArg
 @Entity
-@Table(name = "accesses")
-class MedicalRecordAccessEntity(
+@Table(name = "medical_accesses")
+class MedicalAccessEntity(
 
         givenUuid: UUID?,
 

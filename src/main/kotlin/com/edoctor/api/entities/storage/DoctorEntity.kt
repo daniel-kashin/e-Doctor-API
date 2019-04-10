@@ -2,7 +2,6 @@ package com.edoctor.api.entities.storage
 
 import com.edoctor.api.entities.storage.base.UserEntity
 import com.edoctor.api.utils.NoArg
-import com.sun.org.apache.xpath.internal.operations.Bool
 import java.util.*
 import javax.persistence.*
 
@@ -52,6 +51,6 @@ class DoctorEntity constructor(
         val conversations: MutableSet<ConversationEntity>,
 
         @OneToMany(mappedBy = "doctor", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        val medicalAccesses: MutableSet<MedicalRecordAccessEntity>
+        val medicalAccesses: MutableSet<MedicalAccessEntity>
 
 ) : UserEntity(givenUuid, fullName, city, dateOfBirthTimestamp, isMale, imageName, email, password)
