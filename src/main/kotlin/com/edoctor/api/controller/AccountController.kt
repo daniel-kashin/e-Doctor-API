@@ -2,7 +2,7 @@ package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.model.user.UserModelWrapper
 import com.edoctor.api.files.ImageFilesStorage
-import com.edoctor.api.mapper.UserMapper.toNetwork
+import com.edoctor.api.mapper.UserMapper.toWrapper
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import mu.KotlinLogging.logger
@@ -38,12 +38,12 @@ class AccountController {
 
         val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
         if (patient != null) {
-            return ResponseEntity.ok(toNetwork(patient))
+            return ResponseEntity.ok(toWrapper(patient))
         }
 
         val doctor = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
         if (doctor != null) {
-            return ResponseEntity.ok(toNetwork(doctor))
+            return ResponseEntity.ok(toWrapper(doctor))
         }
 
         return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -73,7 +73,7 @@ class AccountController {
                     newImageUuid?.let { imageUuid = it }
                 }
                 patientRepository.save(newPatient)
-                ResponseEntity.ok(toNetwork(newPatient))
+                ResponseEntity.ok(toWrapper(newPatient))
             }
         }
 
@@ -99,7 +99,7 @@ class AccountController {
                     newImageUuid?.let { imageUuid = it }
                 }
                 doctorRepository.save(newDoctor)
-                ResponseEntity.ok(toNetwork(newDoctor))
+                ResponseEntity.ok(toWrapper(newDoctor))
             }
         }
 

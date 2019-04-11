@@ -3,8 +3,6 @@ package com.edoctor.api.mapper
 import com.edoctor.api.entities.domain.CallActionRequest
 import com.edoctor.api.entities.domain.CallActionRequest.CallAction.*
 import com.edoctor.api.entities.domain.CallStatusResponse
-import com.edoctor.api.entities.network.model.user.DoctorModel
-import com.edoctor.api.entities.network.model.user.PatientModel
 import com.edoctor.api.entities.network.request.CallActionMessageRequest
 import com.edoctor.api.entities.network.request.CallActionMessageRequest.Companion.CALL_ACTION_ENTER
 import com.edoctor.api.entities.network.request.CallActionMessageRequest.Companion.CALL_ACTION_INITIATE
@@ -23,7 +21,7 @@ import com.edoctor.api.entities.storage.ConversationEntity
 import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.MessageEntity
 import com.edoctor.api.entities.storage.PatientEntity
-import com.edoctor.api.mapper.UserMapper.toNetwork
+import com.edoctor.api.mapper.UserMapper.toWrapper
 import com.edoctor.api.utils.currentUnixTime
 import java.lang.IllegalStateException
 import java.util.UUID.randomUUID
@@ -64,8 +62,8 @@ object MessageMapper {
             patientEntity: PatientEntity,
             doctorEntity: DoctorEntity
     ): MessageResponse? = messageEntity.run {
-        val sender = if (isFromPatient) toNetwork(patientEntity) else toNetwork(doctorEntity)
-        val recipient = if (isFromPatient) toNetwork(doctorEntity) else toNetwork(patientEntity)
+        val sender = if (isFromPatient) toWrapper(patientEntity) else toWrapper(doctorEntity)
+        val recipient = if (isFromPatient) toWrapper(doctorEntity) else toWrapper(patientEntity)
 
         return when {
             text != null -> {

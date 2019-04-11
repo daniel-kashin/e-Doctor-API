@@ -52,7 +52,7 @@ class AuthorizationController {
             ).let {
                 log.info { "savePatient(loginRequest = $loginRequest, patient = $it)" }
                 patientRepository.save(it)
-                UserMapper.toNetwork(it)
+                UserMapper.toWrapper(it)
             }
         } else {
             DoctorEntity(
@@ -64,7 +64,7 @@ class AuthorizationController {
             ).let {
                 log.info { "saveDoctor(loginRequest = $loginRequest, doctor = $it)" }
                 doctorRepository.save(it)
-                UserMapper.toNetwork(it)
+                UserMapper.toWrapper(it)
             }
         }
 
@@ -80,7 +80,7 @@ class AuthorizationController {
             log.info { "getPatient(loginRequest = $loginRequest, patient = $patient)" }
 
             if (passwordEncoder.matches(loginRequest.password, patient.password)) {
-                ResponseEntity.ok(UserMapper.toNetwork(patient))
+                ResponseEntity.ok(UserMapper.toWrapper(patient))
             } else {
                 ResponseEntity(HttpStatus.CONFLICT)
             }
@@ -91,7 +91,7 @@ class AuthorizationController {
             log.info { "getDoctor(loginRequest = $loginRequest, doctor = $doctor)" }
 
             if (passwordEncoder.matches(loginRequest.password, doctor.password)) {
-                ResponseEntity.ok(UserMapper.toNetwork(doctor))
+                ResponseEntity.ok(UserMapper.toWrapper(doctor))
             } else {
                 ResponseEntity(HttpStatus.CONFLICT)
             }

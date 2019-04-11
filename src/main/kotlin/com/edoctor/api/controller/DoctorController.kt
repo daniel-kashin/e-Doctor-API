@@ -2,9 +2,8 @@ package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.response.DoctorsResponse
 import com.edoctor.api.entities.storage.DoctorEntity
-import com.edoctor.api.mapper.UserMapper.toNetwork
+import com.edoctor.api.mapper.UserMapper.toWrapper
 import com.edoctor.api.repositories.DoctorRepository
-import com.sun.org.apache.xpath.internal.operations.Bool
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,7 +28,7 @@ class DoctorController {
         return ResponseEntity.ok(
                 DoctorsResponse(doctorEntities.mapNotNull {
                     it.takeIf { it.shouldBeSearched() }
-                            ?.let { toNetwork(it) }
+                            ?.let { toWrapper(it) }
                             ?.doctorModel
                 })
         )

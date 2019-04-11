@@ -3,6 +3,7 @@ package com.edoctor.api.entities.network.model.user
 import com.fasterxml.jackson.annotation.JsonProperty
 
 sealed class UserModel {
+    abstract val uuid: String
     abstract val email: String
     abstract val fullName: String?
     abstract val city: String?
@@ -12,6 +13,7 @@ sealed class UserModel {
 }
 
 data class PatientModel(
+        override val uuid: String,
         override val email: String,
         override val city: String?,
         override val fullName: String?,
@@ -23,6 +25,7 @@ data class PatientModel(
 ) : UserModel()
 
 data class DoctorModel(
+        override val uuid: String,
         override val email: String,
         override val city: String?,
         override val fullName: String?,
