@@ -43,11 +43,19 @@ class MedicalAccessesController {
         val user = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        val accessesForDoctor = medicalAccessesRepository.findAllByDoctorUuid(user.uuid)
-                .groupBy { it.patient }
-                .map { (patient, accesses) ->
-                    toDoctorModel(patient, accesses)
-                }
+        val accessesForDoctor = if (patientUuid == null) {
+            medicalAccessesRepository.findAllByDoctorUuid(user.uuid)
+                    .groupBy { it.patient }
+                    .map { (patient, accesses) ->
+                        toDoctorModel(patient, accesses)
+                    }
+        } else {
+            val patient = patientRepository.findById(patientUuid).orElse(null)
+                    ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            val accesses = medicalAccessesRepository.findAllByDoctorUuidAndPatientUuid(user.uuid, patientUuid)
+
+            listOf(toDoctorModel(patient, accesses))
+        }
 
         return ResponseEntity.ok(MedicalAccessesForDoctorModel(accessesForDoctor))
     }
@@ -55,18 +63,26 @@ class MedicalAccessesController {
     @GetMapping("/medicalAccessesForPatient")
     fun getMedicalAccessesForPatient(
             authentication: OAuth2Authentication,
-            @RequestParam patientUuid: String?
+            @RequestParam doctorUuid: String?
     ): ResponseEntity<MedicalAccessesForPatientModel> {
         val principal = authentication.principal as User
 
         val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        val accessesForPatient = medicalAccessesRepository.findAllByPatientUuid(user.uuid)
-                .groupBy { it.doctor }
-                .map { (doctor, accesses) ->
-                    toPatientModel(doctor, accesses)
-                }
+        val accessesForPatient = if (doctorUuid == null) {
+            medicalAccessesRepository.findAllByPatientUuid(user.uuid)
+                    .groupBy { it.doctor }
+                    .map { (doctor, accesses) ->
+                        toPatientModel(doctor, accesses)
+                    }
+        } else {
+            val doctor = doctorRepository.findById(doctorUuid).orElse(null)
+                    ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            val accesses = medicalAccessesRepository.findAllByDoctorUuidAndPatientUuid(doctorUuid, user.uuid)
+
+            listOf(toPatientModel(doctor, accesses))
+        }
 
         return ResponseEntity.ok(MedicalAccessesForPatientModel(accessesForPatient))
     }

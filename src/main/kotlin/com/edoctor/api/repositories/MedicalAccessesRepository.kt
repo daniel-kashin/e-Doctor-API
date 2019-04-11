@@ -11,6 +11,8 @@ interface MedicalAccessesRepository : JpaRepository<MedicalAccessEntity, String>
 
     fun findAllByPatientUuid(patientUuid: String): List<MedicalAccessEntity>
 
+    fun findAllByDoctorUuidAndPatientUuid(doctorUuid: String, patientUuid: String): List<MedicalAccessEntity>
+
     fun removeAllByDoctorUuidAndPatientUuid(doctorUuid: String, patientUuid: String)
 
 }
