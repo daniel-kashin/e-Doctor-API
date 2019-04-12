@@ -5,8 +5,10 @@ import com.edoctor.api.entities.domain.MedicalEventType.Companion.ALL_MEDICAL_EV
 import com.edoctor.api.entities.domain.MedicalRecordType
 import com.edoctor.api.entities.network.model.record.MedicalAccessesForDoctorModel
 import com.edoctor.api.entities.network.model.record.MedicalAccessesForPatientModel
+import com.edoctor.api.entities.network.model.record.MedicalRecordTypeModel
 import com.edoctor.api.entities.storage.BodyParameterEntityType
 import com.edoctor.api.entities.storage.MedicalAccessEntity
+import com.edoctor.api.entities.storage.PatientEntity
 import com.edoctor.api.mapper.MedicalAccessMapper.toDoctorModel
 import com.edoctor.api.mapper.MedicalAccessMapper.toPatientModel
 import com.edoctor.api.mapper.MedicalRecordTypeMapper.toDomain
@@ -57,14 +59,14 @@ class MedicalAccessesController {
             medicalAccessesRepository.findAllByDoctorUuid(user.uuid)
                     .groupBy { it.patient }
                     .map { (patient, accesses) ->
-                        toDoctorModel(patient, accesses)
+                        toDoctorModel(patient, accesses, patient.getAllMedicalRecordTypes())
                     }
         } else {
             val patient = patientRepository.findById(patientUuid).orElse(null)
                     ?: return ResponseEntity(HttpStatus.NOT_FOUND)
             val accesses = medicalAccessesRepository.findAllByDoctorUuidAndPatientUuid(user.uuid, patientUuid)
 
-            listOf(toDoctorModel(patient, accesses))
+            listOf(toDoctorModel(patient, accesses, patient.getAllMedicalRecordTypes()))
         }
 
         return ResponseEntity.ok(MedicalAccessesForDoctorModel(accessesForDoctor))
@@ -94,14 +96,12 @@ class MedicalAccessesController {
             listOf(toPatientModel(doctor, accesses))
         }
 
-        val distinctUserTypes = bodyParameterRepository.getDistinctTypesForPatient(user.uuid)
-                .mapNotNull<BodyParameterEntityType, MedicalRecordType> { toDomain(it) }
-                .plus(NON_CUSTOM_BODY_PARAMETER_TYPES)
-                .plus(ALL_MEDICAL_EVENT_TYPES)
-                .distinct()
-                .map { toModel(it) }
-
-        return ResponseEntity.ok(MedicalAccessesForPatientModel(accessesForPatient, distinctUserTypes))
+        return ResponseEntity.ok(
+                MedicalAccessesForPatientModel(
+                        accessesForPatient,
+                        user.getAllMedicalRecordTypes()
+                )
+        )
     }
 
     @PostMapping("/medicalAccessesForPatient")
@@ -136,6 +136,15 @@ class MedicalAccessesController {
         }
 
         return ResponseEntity.noContent().build()
+    }
+
+    private fun PatientEntity.getAllMedicalRecordTypes(): List<MedicalRecordTypeModel> {
+        return bodyParameterRepository.getDistinctTypesForPatient(uuid)
+                .mapNotNull<BodyParameterEntityType, MedicalRecordType> { toDomain(it) }
+                .plus(NON_CUSTOM_BODY_PARAMETER_TYPES)
+                .plus(ALL_MEDICAL_EVENT_TYPES)
+                .distinct()
+                .map { toModel(it) }
     }
 
 }

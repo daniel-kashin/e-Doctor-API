@@ -11,7 +11,8 @@ object MedicalAccessMapper {
 
     fun toDoctorModel(
             patient: PatientEntity,
-            medicalAccessesForPatient: List<MedicalAccessEntity>
+            medicalAccessesForPatient: List<MedicalAccessEntity>,
+            allPatientTypes: List<MedicalRecordTypeModel>
     ) = MedicalAccessForDoctorModel(
             UserMapper.toModel(patient),
             medicalAccessesForPatient.map {
@@ -20,7 +21,8 @@ object MedicalAccessMapper {
                         it.customModelName,
                         it.customModelUnit
                 )
-            }
+            },
+            allPatientTypes
     )
 
     fun toPatientModel(
