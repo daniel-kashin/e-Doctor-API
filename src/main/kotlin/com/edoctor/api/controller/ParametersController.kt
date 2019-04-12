@@ -40,7 +40,7 @@ class ParametersController {
         val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        val distinctTypes = bodyParameterRepository.getDistinctTypes()
+        val distinctTypes = bodyParameterRepository.getDistinctTypesForPatient(user.uuid)
 
         val parameters = distinctTypes
                 .mapNotNull {

@@ -11,8 +11,9 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
 
     @Query("SELECT new com.edoctor.api.entities.storage.BodyParameterEntityType(e.type, e.customModelName, e.customModelUnit) " +
             "FROM BodyParameterEntity e " +
+            "WHERE e.patient.uuid = ?1 " +
             "GROUP BY e.type, e.customModelName, e.customModelUnit")
-    fun getDistinctTypes(): List<BodyParameterEntityType>
+    fun getDistinctTypesForPatient(patientUuid: String): List<BodyParameterEntityType>
 
     fun findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
             type: Int,

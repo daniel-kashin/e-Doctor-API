@@ -51,6 +51,6 @@ class MedicalEventEntity(
 
 ) : RandomUuidEntity(givenUuid)
 
-class MedicalEntityType(
+class MedicalEventEntityType(
         val type: Int
 )

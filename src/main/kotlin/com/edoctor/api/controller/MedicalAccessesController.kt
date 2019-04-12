@@ -1,10 +1,17 @@
 package com.edoctor.api.controller
 
+import com.edoctor.api.entities.domain.BodyParameterType.Companion.NON_CUSTOM_BODY_PARAMETER_TYPES
+import com.edoctor.api.entities.domain.MedicalEventType.Companion.ALL_MEDICAL_EVENT_TYPES
+import com.edoctor.api.entities.domain.MedicalRecordType
 import com.edoctor.api.entities.network.model.record.MedicalAccessesForDoctorModel
 import com.edoctor.api.entities.network.model.record.MedicalAccessesForPatientModel
+import com.edoctor.api.entities.storage.BodyParameterEntityType
 import com.edoctor.api.entities.storage.MedicalAccessEntity
 import com.edoctor.api.mapper.MedicalAccessMapper.toDoctorModel
 import com.edoctor.api.mapper.MedicalAccessMapper.toPatientModel
+import com.edoctor.api.mapper.MedicalRecordTypeMapper.toDomain
+import com.edoctor.api.mapper.MedicalRecordTypeMapper.toModel
+import com.edoctor.api.repositories.BodyParameterRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.MedicalAccessesRepository
 import com.edoctor.api.repositories.PatientRepository
@@ -32,6 +39,9 @@ class MedicalAccessesController {
 
     @Autowired
     private lateinit var medicalAccessesRepository: MedicalAccessesRepository
+
+    @Autowired
+    private lateinit var bodyParameterRepository: BodyParameterRepository
 
     @GetMapping("/medicalAccessesForDoctor")
     fun getMedicalAccessesForDoctor(
@@ -84,7 +94,14 @@ class MedicalAccessesController {
             listOf(toPatientModel(doctor, accesses))
         }
 
-        return ResponseEntity.ok(MedicalAccessesForPatientModel(accessesForPatient))
+        val distinctUserTypes = bodyParameterRepository.getDistinctTypesForPatient(user.uuid)
+                .mapNotNull<BodyParameterEntityType, MedicalRecordType> { toDomain(it) }
+                .plus(NON_CUSTOM_BODY_PARAMETER_TYPES)
+                .plus(ALL_MEDICAL_EVENT_TYPES)
+                .distinct()
+                .map { toModel(it) }
+
+        return ResponseEntity.ok(MedicalAccessesForPatientModel(accessesForPatient, distinctUserTypes))
     }
 
     @PostMapping("/medicalAccessesForPatient")
