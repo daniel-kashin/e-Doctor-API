@@ -130,7 +130,7 @@ class ParametersController {
     ): ResponseEntity<BodyParametersResponse> {
         val principal = authentication.principal as User
 
-        val doctor = patientRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
+        val doctor = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
         val patient = patientRepository.findById(patientUuid).orElse(null)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.NOT_FOUND)

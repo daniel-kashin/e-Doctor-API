@@ -144,6 +144,7 @@ class MedicalAccessesController {
                 .plus(NON_CUSTOM_BODY_PARAMETER_TYPES)
                 .plus(ALL_MEDICAL_EVENT_TYPES)
                 .distinct()
+                .filterNotNull()
                 .map { toModel(it) }
     }
 
