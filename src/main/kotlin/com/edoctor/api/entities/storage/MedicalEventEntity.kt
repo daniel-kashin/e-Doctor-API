@@ -24,7 +24,7 @@ class MedicalEventEntity(
         val doctorCreator: DoctorEntity?,
 
         @Column(nullable = false)
-        var isAddedFromDoctor: Boolean,
+        var isAddedFromDoctor: Boolean = false,
 
         @Column(nullable = false)
         var timestamp: Long,

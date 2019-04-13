@@ -104,6 +104,7 @@ class MedicalEventsController {
                         diagnosis = event.diagnosis
                         recipe = event.recipe
                         comment = event.comment
+                        isAddedFromDoctor = event.isAddedFromDoctor
                     }
             )
         }
