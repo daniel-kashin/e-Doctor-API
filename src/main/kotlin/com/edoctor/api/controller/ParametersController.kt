@@ -30,7 +30,7 @@ class ParametersController {
     @Autowired
     private lateinit var patientRepository: PatientRepository
 
-    @GetMapping("/latestParameters")
+    @GetMapping("/latestParametersForPatient")
     @Transactional
     fun getLatestParametersOfEachType(
             authentication: OAuth2Authentication
@@ -57,7 +57,7 @@ class ParametersController {
         return ResponseEntity.ok(BodyParametersResponse(parameters))
     }
 
-    @PostMapping("/parameters")
+    @PostMapping("/parametersForPatient")
     @Transactional
     fun getParameters(
             @RequestBody type: BodyParameterTypeWrapper,
@@ -80,7 +80,7 @@ class ParametersController {
         return ResponseEntity.ok(BodyParametersResponse(parameters))
     }
 
-    @PostMapping("/addOrEditParameter")
+    @PostMapping("/addOrEditParameterForPatient")
     @Transactional
     fun addOrEditParameter(
             @RequestBody parameter: BodyParameterWrapper,
@@ -108,7 +108,7 @@ class ParametersController {
         return ResponseEntity.ok(parameter)
     }
 
-    @PostMapping("/deleteParameter")
+    @PostMapping("/deleteParameterForPatient")
     @Transactional
     fun deleteParameter(
             @RequestBody parameter: BodyParameterWrapper,

@@ -28,7 +28,7 @@ class MedicalEventsController {
     @Autowired
     private lateinit var patientRepository: PatientRepository
 
-    @GetMapping("/medicalEvents")
+    @GetMapping("/medicalEventsForPatient")
     @Transactional
     fun getEvents(
             authentication: OAuth2Authentication
@@ -43,7 +43,7 @@ class MedicalEventsController {
         return ResponseEntity.ok(MedicalEventsResponse(events))
     }
 
-    @PostMapping("/addOrEditMedicalEvent")
+    @PostMapping("/addOrEditMedicalEventForPatient")
     @Transactional
     fun addOrEditMedicalEvent(
             @RequestBody event: MedicalEventWrapper,
@@ -78,7 +78,7 @@ class MedicalEventsController {
         return ResponseEntity.ok(event)
     }
 
-    @PostMapping("/deleteMedicalEvent")
+    @PostMapping("/deleteMedicalEventForPatient")
     @Transactional
     fun deleteParameter(
             @RequestBody event: MedicalEventWrapper,
