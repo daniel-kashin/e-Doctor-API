@@ -1,10 +1,13 @@
 package com.edoctor.api.entities.network.model.record
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class MedicalEventWrapper(
         val uuid: String,
         val timestamp: Long,
         val type: Int,
         val doctorCreatorUuid: String?,
+        @get:JsonProperty("isAddedFromDoctor")
         val isAddedFromDoctor: Boolean,
         val endTimestamp: Long? = null,
         val name: String? = null,
