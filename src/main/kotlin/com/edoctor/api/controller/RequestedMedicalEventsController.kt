@@ -54,7 +54,7 @@ class RequestedMedicalEventsController {
     @Transactional
     fun getRequestedEventsForDoctor(
             authentication: OAuth2Authentication,
-            @RequestParam("doctorUuid") patientUuid: String
+            @RequestParam("patientUuid") patientUuid: String
     ): ResponseEntity<MedicalEventsResponse> {
         val principal = authentication.principal as User
 
