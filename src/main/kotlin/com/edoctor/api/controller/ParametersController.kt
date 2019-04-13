@@ -74,7 +74,7 @@ class ParametersController {
 
         val doctor = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
-        val patient = patientRepository.findByEmail(patientUuid)?.also { log.info { "got patient: $it" } }
+        val patient = patientRepository.findById(patientUuid).orElse(null)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
         val domainAccesses = medicalAccessesRepository.findAllByDoctorUuidAndPatientUuid(doctor.uuid, patient.uuid)
@@ -132,7 +132,7 @@ class ParametersController {
 
         val doctor = patientRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
-        val patient = patientRepository.findByEmail(patientUuid)?.also { log.info { "got patient: $it" } }
+        val patient = patientRepository.findById(patientUuid).orElse(null)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
         val domainAccesses = medicalAccessesRepository.findAllByDoctorUuidAndPatientUuid(doctor.uuid, patient.uuid)
