@@ -46,7 +46,9 @@ class MedicalEventsController {
         val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        val events = user.medicalEvents.map { MedicalEventMapper.toNetwork(it) }
+        val events = user.medicalEvents
+                .filter { it.doctorCreator == null || it.isAddedFromDoctor }
+                .map { MedicalEventMapper.toNetwork(it) }
 
         return ResponseEntity.ok(MedicalEventsResponse(events))
     }
