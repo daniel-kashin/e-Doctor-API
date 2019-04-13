@@ -88,7 +88,7 @@ class MedicalEventsController {
         val existing = medicalEventRepository.findByUuidAndPatientUuid(event.uuid, user.uuid)
 
         if (existing == null) {
-            medicalEventRepository.save(MedicalEventMapper.toEntity(event, user))
+            medicalEventRepository.save(MedicalEventMapper.toEntity(event, user, null))
         } else {
             medicalEventRepository.save(
                     existing.apply {
