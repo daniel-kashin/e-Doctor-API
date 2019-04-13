@@ -30,7 +30,7 @@ class MedicalEventsController {
 
     @GetMapping("/medicalEventsForPatient")
     @Transactional
-    fun getEvents(
+    fun getEventsForPatient(
             authentication: OAuth2Authentication
     ): ResponseEntity<MedicalEventsResponse> {
         val principal = authentication.principal as User
@@ -45,7 +45,7 @@ class MedicalEventsController {
 
     @PostMapping("/addOrEditMedicalEventForPatient")
     @Transactional
-    fun addOrEditMedicalEvent(
+    fun addOrEditMedicalEventForPatient(
             @RequestBody event: MedicalEventWrapper,
             authentication: OAuth2Authentication
     ): ResponseEntity<MedicalEventWrapper> {
@@ -80,7 +80,7 @@ class MedicalEventsController {
 
     @PostMapping("/deleteMedicalEventForPatient")
     @Transactional
-    fun deleteParameter(
+    fun deleteParameterForPatient(
             @RequestBody event: MedicalEventWrapper,
             authentication: OAuth2Authentication
     ): ResponseEntity<String> {

@@ -32,7 +32,7 @@ class ParametersController {
 
     @GetMapping("/latestParametersForPatient")
     @Transactional
-    fun getLatestParametersOfEachType(
+    fun getLatestParametersOfEachTypeForPatient(
             authentication: OAuth2Authentication
     ): ResponseEntity<BodyParametersResponse> {
         val principal = authentication.principal as User
@@ -59,7 +59,7 @@ class ParametersController {
 
     @PostMapping("/parametersForPatient")
     @Transactional
-    fun getParameters(
+    fun getParametersForPatient(
             @RequestBody type: BodyParameterTypeWrapper,
             authentication: OAuth2Authentication
     ): ResponseEntity<BodyParametersResponse> {
@@ -82,7 +82,7 @@ class ParametersController {
 
     @PostMapping("/addOrEditParameterForPatient")
     @Transactional
-    fun addOrEditParameter(
+    fun addOrEditParameterForPatient(
             @RequestBody parameter: BodyParameterWrapper,
             authentication: OAuth2Authentication
     ): ResponseEntity<BodyParameterWrapper> {
@@ -110,7 +110,7 @@ class ParametersController {
 
     @PostMapping("/deleteParameterForPatient")
     @Transactional
-    fun deleteParameter(
+    fun deleteParameterForPatient(
             @RequestBody parameter: BodyParameterWrapper,
             authentication: OAuth2Authentication
     ): ResponseEntity<String> {
