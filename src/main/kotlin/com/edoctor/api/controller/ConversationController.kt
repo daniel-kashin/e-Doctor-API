@@ -46,7 +46,11 @@ class ConversationController {
         }
 
         val sortedConversations = conversations
-                .mapNotNull { toResponse(it.messages.last(), it.patient, it.doctor) }
+                .mapNotNull { conversation ->
+                    conversation.messages.maxBy { it.timestamp }?.let {
+                        toResponse(it, conversation.patient, conversation.doctor)
+                    }
+                }
                 .sortedByDescending { it.sendingTimestamp }
                 .mapNotNull { wrapResponse(it) }
 

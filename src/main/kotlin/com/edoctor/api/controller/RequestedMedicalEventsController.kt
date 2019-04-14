@@ -30,6 +30,9 @@ class RequestedMedicalEventsController {
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
 
+    @Autowired
+    private lateinit var chatHandler: ChatHandler
+
     @GetMapping("/requestedMedicalEventsForPatient")
     @Transactional
     fun getRequestedEventsForPatient(
@@ -93,6 +96,8 @@ class RequestedMedicalEventsController {
         val entityToSave = MedicalEventMapper.toEntity(event, patient, doctor)
 
         medicalEventRepository.save(entityToSave)
+
+        chatHandler.onMedicalRecordRequest(patient, doctor)
 
         return ResponseEntity.ok(MedicalEventMapper.toNetwork(entityToSave))
     }

@@ -45,6 +45,9 @@ class MedicalAccessesController {
     @Autowired
     private lateinit var bodyParameterRepository: BodyParameterRepository
 
+    @Autowired
+    private lateinit var chatHandler: ChatHandler
+
     @GetMapping("/medicalAccessesForDoctor")
     fun getMedicalAccessesForDoctor(
             authentication: OAuth2Authentication,
@@ -133,6 +136,8 @@ class MedicalAccessesController {
                         )
                 )
             }
+
+            chatHandler.onMedicalAccessesChanged(user, doctor)
         }
 
         return ResponseEntity.noContent().build()
