@@ -10,13 +10,10 @@ import com.edoctor.api.entities.network.request.CallActionMessageRequest.Compani
 import com.edoctor.api.entities.network.request.MessageRequest
 import com.edoctor.api.entities.network.request.MessageRequestWrapper
 import com.edoctor.api.entities.network.request.TextMessageRequest
-import com.edoctor.api.entities.network.response.CallStatusMessageResponse
+import com.edoctor.api.entities.network.response.*
 import com.edoctor.api.entities.network.response.CallStatusMessageResponse.Companion.CALL_STATUS_CANCELLED
 import com.edoctor.api.entities.network.response.CallStatusMessageResponse.Companion.CALL_STATUS_INITIATED
 import com.edoctor.api.entities.network.response.CallStatusMessageResponse.Companion.CALL_STATUS_STARTED
-import com.edoctor.api.entities.network.response.MessageResponse
-import com.edoctor.api.entities.network.response.MessageResponseWrapper
-import com.edoctor.api.entities.network.response.TextMessageResponse
 import com.edoctor.api.entities.storage.ConversationEntity
 import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.MessageEntity
@@ -27,6 +24,11 @@ import java.lang.IllegalStateException
 import java.util.UUID.randomUUID
 
 object MessageMapper {
+
+    private const val MESSAGE_TYPE_MEDICAL_ACCESSES = 0
+    private const val MESSAGE_TYPE_MEDICAL_RECORD_REQUEST = 1
+    private const val MESSAGE_TYPE_TEXT = 2
+    private const val MESSAGE_TYPE_CALL_STATUS = 3
 
     fun unwrapRequest(
             messageRequestWrapper: MessageRequestWrapper
@@ -41,6 +43,8 @@ object MessageMapper {
     ): MessageResponseWrapper? = when (messageResponse) {
         is TextMessageResponse -> MessageResponseWrapper(textMessageResponse = messageResponse)
         is CallStatusMessageResponse -> MessageResponseWrapper(callStatusMessageResponse = messageResponse)
+        is MedicalRecordRequestMessageResponse -> MessageResponseWrapper(medicalRecordRequestResponse = messageResponse)
+        is MedicalAccessesMessageResponse -> MessageResponseWrapper(medicalAccessesMessageResponse = messageResponse)
         else -> null
     }
 
@@ -66,15 +70,41 @@ object MessageMapper {
         val recipient = if (isFromPatient) toWrapper(doctorEntity) else toWrapper(patientEntity)
 
         return when {
-            text != null -> {
+            type == MESSAGE_TYPE_TEXT && text != null -> {
                 TextMessageResponse(uuid, sender, recipient, timestamp, text)
             }
-            callStatus != null && callUuid != null -> {
+            type == MESSAGE_TYPE_CALL_STATUS && callStatus != null && callUuid != null -> {
                 CallStatusMessageResponse(uuid, sender, recipient, timestamp, callStatus, callUuid)
+            }
+            type == MESSAGE_TYPE_MEDICAL_RECORD_REQUEST -> {
+                MedicalRecordRequestMessageResponse(uuid, sender, recipient, timestamp)
+            }
+            type == MESSAGE_TYPE_MEDICAL_ACCESSES -> {
+                MedicalAccessesMessageResponse(uuid, sender, recipient, timestamp)
             }
             else -> null
         }
     }
+
+    fun toEntityMedicalAccesses(
+            conversation: ConversationEntity
+    ): MessageEntity = MessageEntity(
+            givenUuid = randomUUID(),
+            timestamp = currentUnixTime(),
+            type = MESSAGE_TYPE_MEDICAL_ACCESSES,
+            isFromPatient = true,
+            conversation = conversation
+    )
+
+    fun toEntityMedicalRecordRequest(
+            conversation: ConversationEntity
+    ): MessageEntity = MessageEntity(
+            givenUuid = randomUUID(),
+            timestamp = currentUnixTime(),
+            type = MESSAGE_TYPE_MEDICAL_RECORD_REQUEST,
+            isFromPatient = false,
+            conversation = conversation
+    )
 
     fun toEntityText(
             textMessageResult: TextMessageRequest,
@@ -84,6 +114,7 @@ object MessageMapper {
         MessageEntity(
                 givenUuid = randomUUID(),
                 timestamp = currentUnixTime(),
+                type = MESSAGE_TYPE_TEXT,
                 text = text,
                 isFromPatient = isFromPatient,
                 conversation = conversation
@@ -103,6 +134,7 @@ object MessageMapper {
         MessageEntity(
                 givenUuid = randomUUID(),
                 timestamp = currentUnixTime(),
+                type = MESSAGE_TYPE_CALL_STATUS,
                 callStatus = status,
                 callUuid = callUuid,
                 isFromPatient = isFromPatient,

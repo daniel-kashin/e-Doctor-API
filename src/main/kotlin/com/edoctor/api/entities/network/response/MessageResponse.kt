@@ -8,8 +8,6 @@ sealed class MessageResponse {
     abstract val sendingTimestamp: Long
 }
 
-sealed class SystemMessageResponse : MessageResponse()
-
 sealed class UserMessageResponse : MessageResponse() {
     abstract val senderUser: UserModelWrapper
 }
@@ -40,17 +38,30 @@ data class TextMessageResponse(
         val text: String
 ) : UserMessageResponse()
 
+data class MedicalAccessesMessageResponse(
+        override val uuid: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
+        override val sendingTimestamp: Long
+) : UserMessageResponse()
 
+data class MedicalRecordRequestMessageResponse(
+        override val uuid: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
+        override val sendingTimestamp: Long
+) : UserMessageResponse()
 
 
 // TODO
 data class ConsultationStatusMessageResponse(
         override val uuid: String,
+        override val senderUser: UserModelWrapper,
         override val recipientUser: UserModelWrapper,
         override val sendingTimestamp: Long,
         val initiatorUuid: String,
         val statusType: StatusType
-) : SystemMessageResponse() {
+) : UserMessageResponse() {
 
     sealed class StatusType {
         class Started(val startTimestamp: Long) : StatusType()
@@ -58,22 +69,6 @@ data class ConsultationStatusMessageResponse(
         class Ended(val endTimestamp: Long) : StatusType()
     }
 }
-
-data class MedicalRecordsAccessChangedMessageResponse(
-        override val uuid: String,
-        override val recipientUser: UserModelWrapper,
-        override val sendingTimestamp: Long,
-        val isAllowed: Boolean,
-        val patientUuid: String,
-        val medicalRecordAccessData: MedicalRecordAccessData
-) : SystemMessageResponse() {
-
-    sealed class MedicalRecordAccessData {
-        object AllRecordsAccessData : MedicalRecordAccessData()
-        class SomeRecordsAccessData(val medicalRecordUuids: List<String>) : MedicalRecordAccessData()
-    }
-}
-
 
 data class DocumentMessageResponse(
         override val uuid: String,

@@ -19,6 +19,9 @@ class MessageEntity constructor(
         val text: String? = null,
 
         @Column(nullable = true)
+        val type: Int? = null,
+
+        @Column(nullable = true)
         val callStatus: Int? = null,
 
         @Column(nullable = true)
