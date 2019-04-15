@@ -11,6 +11,7 @@ import com.edoctor.api.entities.storage.DoctorEntity
 import com.edoctor.api.entities.storage.PatientEntity
 import com.edoctor.api.mapper.MessageMapper.toDomainCallAction
 import com.edoctor.api.mapper.MessageMapper.toEntityCallAction
+import com.edoctor.api.mapper.MessageMapper.toEntityImage
 import com.edoctor.api.mapper.MessageMapper.toEntityMedicalAccesses
 import com.edoctor.api.mapper.MessageMapper.toEntityMedicalRecordRequest
 import com.edoctor.api.mapper.MessageMapper.toEntityText
@@ -18,7 +19,6 @@ import com.edoctor.api.mapper.MessageMapper.toResponse
 import com.edoctor.api.mapper.MessageMapper.unwrapRequest
 import com.edoctor.api.mapper.MessageMapper.wrapResponse
 import com.edoctor.api.repositories.CallRepository
-import com.edoctor.api.repositories.ConversationRepository
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
 import com.edoctor.api.service.ConversationService
@@ -93,12 +93,27 @@ class ChatHandler : TextWebSocketHandler() {
         log.info { "afterConnectionClosed(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
     }
 
+    fun onImageUploaded(principal: WebSocketPrincipal, imageUuid: String) {
+        val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient) ?: return
+        val patientEntity = patientRepository.findByEmail(principal.patientEmail) ?: return
+        val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail) ?: return
+
+        val messageEntity = toEntityImage(imageUuid, principal.isPatient, conversationEntity)
+
+        conversationService.addMessage(messageEntity, conversationEntity)
+
+        val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity, doctorEntity))
+        val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
+
+        chatSessions.entries
+                .filter { it.key.isInTheSameConversation(principal) }
+                .forEach { (_, sessions) ->
+                    sessions.forEach { it.sendMessageIfOpened(responseSocketMessage) }
+                }
+    }
+
     fun onMedicalAccessesChanged(patientEntity: PatientEntity, doctorEntity: DoctorEntity) {
-        val conversationEntity = conversationService.getConversation(
-                patientEntity.email,
-                doctorEntity.email,
-                true
-        ) ?: return
+        val conversationEntity = conversationService.getConversation(patientEntity.email, doctorEntity.email, true) ?: return
 
         val messageEntity = toEntityMedicalAccesses(conversationEntity)
 
@@ -115,11 +130,7 @@ class ChatHandler : TextWebSocketHandler() {
     }
 
     fun onMedicalRecordRequest(patientEntity: PatientEntity, doctorEntity: DoctorEntity) {
-        val conversationEntity = conversationService.getConversation(
-                patientEntity.email,
-                doctorEntity.email,
-                true
-        ) ?: return
+        val conversationEntity = conversationService.getConversation(patientEntity.email, doctorEntity.email, true) ?: return
 
         val messageEntity = toEntityMedicalRecordRequest(conversationEntity)
 

@@ -52,6 +52,14 @@ data class MedicalRecordRequestMessageResponse(
         override val sendingTimestamp: Long
 ) : UserMessageResponse()
 
+data class ImageMessageResponse(
+        override val uuid: String,
+        override val senderUser: UserModelWrapper,
+        override val recipientUser: UserModelWrapper,
+        override val sendingTimestamp: Long,
+        val relativeImageUrl: String
+): UserMessageResponse()
+
 
 // TODO
 data class ConsultationStatusMessageResponse(

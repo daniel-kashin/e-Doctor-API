@@ -1,5 +1,6 @@
 package com.edoctor.api.mapper
 
+import com.edoctor.api.controller.ImagesController.Companion.toRelativeImageUrl
 import com.edoctor.api.entities.network.model.user.DoctorModel
 import com.edoctor.api.entities.network.model.user.PatientModel
 import com.edoctor.api.entities.network.model.user.UserModelWrapper
@@ -17,7 +18,7 @@ object UserMapper {
                 fullName = fullName,
                 dateOfBirthTimestamp = dateOfBirthTimestamp,
                 isMale = isMale,
-                relativeImageUrl = toRelativeImageUrl(imageUuid),
+                relativeImageUrl = imageUuid?.let { toRelativeImageUrl(it) },
                 bloodGroup = bloodGroup
         )
     }
@@ -30,7 +31,7 @@ object UserMapper {
                 fullName = fullName,
                 dateOfBirthTimestamp = dateOfBirthTimestamp,
                 isMale = isMale,
-                relativeImageUrl = toRelativeImageUrl(imageUuid),
+                relativeImageUrl = imageUuid?.let { toRelativeImageUrl(it) },
                 yearsOfExperience = yearsOfExperience,
                 category = category,
                 specialization = specialization,
@@ -45,7 +46,5 @@ object UserMapper {
 
     fun toWrapper(user: DoctorEntity): UserModelWrapper = UserModelWrapper(doctorModel = toModel(user))
 
-
-    private fun toRelativeImageUrl(imageUuid: String?): String? = imageUuid?.let { "/images/$it" }
 
 }

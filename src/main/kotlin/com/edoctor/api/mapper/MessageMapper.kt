@@ -1,5 +1,6 @@
 package com.edoctor.api.mapper
 
+import com.edoctor.api.controller.ImagesController.Companion.toRelativeImageUrl
 import com.edoctor.api.entities.domain.CallActionRequest
 import com.edoctor.api.entities.domain.CallActionRequest.CallAction.*
 import com.edoctor.api.entities.domain.CallStatusResponse
@@ -29,6 +30,7 @@ object MessageMapper {
     private const val MESSAGE_TYPE_MEDICAL_RECORD_REQUEST = 1
     private const val MESSAGE_TYPE_TEXT = 2
     private const val MESSAGE_TYPE_CALL_STATUS = 3
+    private const val MESSAGE_TYPE_IMAGE = 4
 
     fun unwrapRequest(
             messageRequestWrapper: MessageRequestWrapper
@@ -45,6 +47,7 @@ object MessageMapper {
         is CallStatusMessageResponse -> MessageResponseWrapper(callStatusMessageResponse = messageResponse)
         is MedicalRecordRequestMessageResponse -> MessageResponseWrapper(medicalRecordRequestResponse = messageResponse)
         is MedicalAccessesMessageResponse -> MessageResponseWrapper(medicalAccessesMessageResponse = messageResponse)
+        is ImageMessageResponse -> MessageResponseWrapper(imageMessageResponse = messageResponse)
         else -> null
     }
 
@@ -82,9 +85,25 @@ object MessageMapper {
             type == MESSAGE_TYPE_MEDICAL_ACCESSES -> {
                 MedicalAccessesMessageResponse(uuid, sender, recipient, timestamp)
             }
+            type == MESSAGE_TYPE_IMAGE && imageUuid != null -> {
+                ImageMessageResponse(uuid, sender, recipient, timestamp, toRelativeImageUrl(imageUuid))
+            }
             else -> null
         }
     }
+
+    fun toEntityImage(
+            imageUuid: String,
+            isFromPatient: Boolean,
+            conversation: ConversationEntity
+    ) : MessageEntity = MessageEntity(
+            givenUuid = randomUUID(),
+            timestamp = currentUnixTime(),
+            type = MESSAGE_TYPE_IMAGE,
+            imageUuid = imageUuid,
+            isFromPatient = isFromPatient,
+            conversation = conversation
+    )
 
     fun toEntityMedicalAccesses(
             conversation: ConversationEntity

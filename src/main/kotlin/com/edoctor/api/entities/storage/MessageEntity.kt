@@ -22,6 +22,9 @@ class MessageEntity constructor(
         val type: Int? = null,
 
         @Column(nullable = true)
+        val imageUuid: String? = null,
+
+        @Column(nullable = true)
         val callStatus: Int? = null,
 
         @Column(nullable = true)
