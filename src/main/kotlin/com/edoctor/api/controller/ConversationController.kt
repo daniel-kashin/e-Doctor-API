@@ -28,7 +28,6 @@ class ConversationController {
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
 
-    // TODO: add getting by pages
     @GetMapping("/conversations")
     fun getConversations(authentication: OAuth2Authentication): ResponseEntity<ConversationsResponse> {
         val principal = authentication.principal as User

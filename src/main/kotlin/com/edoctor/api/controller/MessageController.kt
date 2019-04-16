@@ -36,7 +36,6 @@ class MessageController {
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
 
-    // TODO: add getting by pages
     @GetMapping("/messages", params = ["fromTimestamp", "recipientUuid"])
     fun getMessages(
             authentication: OAuth2Authentication,

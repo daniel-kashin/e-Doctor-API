@@ -29,7 +29,6 @@ class AuthorizationController {
     private lateinit var doctorRepository: DoctorRepository
 
     @Autowired
-    // TODO
     private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/register")

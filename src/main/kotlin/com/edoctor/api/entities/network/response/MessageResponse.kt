@@ -59,29 +59,3 @@ data class ImageMessageResponse(
         override val sendingTimestamp: Long,
         val relativeImageUrl: String
 ): UserMessageResponse()
-
-
-// TODO
-data class ConsultationStatusMessageResponse(
-        override val uuid: String,
-        override val senderUser: UserModelWrapper,
-        override val recipientUser: UserModelWrapper,
-        override val sendingTimestamp: Long,
-        val initiatorUuid: String,
-        val statusType: StatusType
-) : UserMessageResponse() {
-
-    sealed class StatusType {
-        class Started(val startTimestamp: Long) : StatusType()
-        class Missed(val initiationTimestamp: Long) : StatusType()
-        class Ended(val endTimestamp: Long) : StatusType()
-    }
-}
-
-data class DocumentMessageResponse(
-        override val uuid: String,
-        override val senderUser: UserModelWrapper,
-        override val recipientUser: UserModelWrapper,
-        override val sendingTimestamp: Long,
-        val documentUuid: String
-) : UserMessageResponse()

@@ -14,7 +14,6 @@ class ImageFilesStorage {
     private val log = logger {}
 
     companion object {
-        // TODO: change when deployment to real server
         private const val IMAGES_DIRECTORY = "/Users/Shared/images"
     }
 
