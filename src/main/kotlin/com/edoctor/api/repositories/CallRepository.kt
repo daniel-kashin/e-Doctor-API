@@ -17,15 +17,15 @@ class CallRepository {
     private val conversationsToCalls: MutableMap<Call, CallStatus> = hashMapOf()
 
     fun findActiveCall(
-            patientEmail: String,
-            doctorEmail: String
+            patientUuid: String,
+            doctorUuid: String
     ): Call? {
-        log.info { "findActiveCall($patientEmail, $doctorEmail)" }
+        log.info { "findActiveCall($patientUuid, $doctorUuid)" }
 
         return conversationsToCalls
                 .entries
                 .firstOrNull {
-                    it.value != CANCELLED && it.key.patientEmail == patientEmail && it.key.doctorEmail == doctorEmail
+                    it.value != CANCELLED && it.key.patientUuid == patientUuid && it.key.doctorUuid == doctorUuid
                 }
                 ?.key
     }
@@ -35,8 +35,8 @@ class CallRepository {
             callAction: CallAction
     ) = onCallActionRequest(
             CallActionRequest(callAction, call.uuid),
-            call.patientEmail,
-            call.doctorEmail,
+            call.patientUuid,
+            call.doctorUuid,
             call.isFromPatient
     ).also {
         log.info { "onCallActionRequest($callAction, $call)" }
@@ -44,8 +44,8 @@ class CallRepository {
 
     fun onCallActionRequest(
             callActionRequest: CallActionRequest,
-            patientEmail: String,
-            doctorEmail: String,
+            patientUuid: String,
+            doctorUuid: String,
             isPatient: Boolean
     ): CallStatusResponse? = synchronized(callActionRequest.callUuid) {
         val currentCallToInfo = conversationsToCalls.entries.firstOrNull { it.key.uuid == callActionRequest.callUuid }
@@ -53,9 +53,9 @@ class CallRepository {
         return when (callActionRequest.callAction) {
             CallAction.INITIATE -> {
                 if (currentCallToInfo == null) {
-                    val call = Call(callActionRequest.callUuid, patientEmail, doctorEmail, isPatient)
+                    val call = Call(callActionRequest.callUuid, patientUuid, doctorUuid, isPatient)
                     conversationsToCalls[call] = INITIATED
-                    CallStatusResponse(INITIATED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                    CallStatusResponse(INITIATED, call.uuid, call.senderUuid, call.recipientUuid, call.isFromPatient)
                             .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                 } else {
                     log.info { "onResponse(request = $callActionRequest, response = null)" }
@@ -67,7 +67,7 @@ class CallRepository {
                     if (currentCallToInfo.key.isFromPatient != isPatient) {
                         val call = currentCallToInfo.key
                         conversationsToCalls[call] = STARTED
-                        CallStatusResponse(STARTED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                        CallStatusResponse(STARTED, call.uuid, call.senderUuid, call.recipientUuid, call.isFromPatient)
                                 .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                     } else {
                         log.info { "onResponse(request = $callActionRequest, response = null)" }
@@ -82,7 +82,7 @@ class CallRepository {
                 if (currentCallToInfo != null && currentCallToInfo.value != CANCELLED) {
                     val call = currentCallToInfo.key
                     conversationsToCalls[call] = CANCELLED
-                    CallStatusResponse(CANCELLED, call.uuid, call.senderEmail, call.recipientEmail, call.isFromPatient)
+                    CallStatusResponse(CANCELLED, call.uuid, call.senderUuid, call.recipientUuid, call.isFromPatient)
                             .also { log.info { "onResponse(request = $callActionRequest, response = $it)" } }
                 } else {
                     log.info { "onResponse(request = $callActionRequest, response = null)" }
@@ -94,12 +94,12 @@ class CallRepository {
 
     data class Call(
             val uuid: String,
-            val patientEmail: String,
-            val doctorEmail: String,
+            val patientUuid: String,
+            val doctorUuid: String,
             val isFromPatient: Boolean
     ) {
-        val senderEmail: String = if (isFromPatient) patientEmail else doctorEmail
-        val recipientEmail: String = if (isFromPatient) doctorEmail else patientEmail
+        val senderUuid: String = if (isFromPatient) patientUuid else doctorUuid
+        val recipientUuid: String = if (isFromPatient) doctorUuid else patientUuid
     }
 
 }

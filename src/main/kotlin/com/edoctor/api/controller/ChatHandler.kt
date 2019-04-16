@@ -68,7 +68,7 @@ class ChatHandler : TextWebSocketHandler() {
             val list = chatSessions[principal] ?: mutableListOf()
             chatSessions += principal to list.apply { add(session) }
         }
-        log.info { "afterConnectionEstablished(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
+        log.info { "afterConnectionEstablished(email=${session.uuid}, chatSessions=${chatSessionsLogInfo()})" }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -80,23 +80,24 @@ class ChatHandler : TextWebSocketHandler() {
                 chatSessions += principal to afterRemove
             }
 
-            callRepository.findActiveCall(principal.patientEmail, principal.doctorEmail)?.let { call ->
+            callRepository.findActiveCall(principal.patientUuid, principal.doctorUuid)?.let { call ->
                 val callStatusResponse = callRepository.onCallActionRequest(call, CallActionRequest.CallAction.LEAVE)
                         ?: return
 
-                val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient)
+                val conversationEntity = conversationService.getConversation(principal.uuid, principal.recipientUuid, principal.isPatient)
                         ?: return
 
                 saveAndSendCallStatusResponse(principal, conversationEntity, callStatusResponse)
             }
         }
-        log.info { "afterConnectionClosed(email=${session.email}, chatSessions=${chatSessionsLogInfo()})" }
+        log.info { "afterConnectionClosed(email=${session.uuid}, chatSessions=${chatSessionsLogInfo()})" }
     }
 
     fun onImageUploaded(principal: WebSocketPrincipal, imageUuid: String) {
-        val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient) ?: return
-        val patientEntity = patientRepository.findByEmail(principal.patientEmail) ?: return
-        val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail) ?: return
+        val conversationEntity = conversationService.getConversation(principal.uuid, principal.recipientUuid, principal.isPatient)
+                ?: return
+        val patientEntity = patientRepository.findById(principal.patientUuid).orElse(null) ?: return
+        val doctorEntity = doctorRepository.findById(principal.doctorUuid).orElse(null) ?: return
 
         val messageEntity = toEntityImage(imageUuid, principal.isPatient, conversationEntity)
 
@@ -123,7 +124,7 @@ class ChatHandler : TextWebSocketHandler() {
         val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
         chatSessions.entries
-                .filter { it.key.isInTheSameConversation(doctorEntity.email, patientEntity.email) }
+                .filter { it.key.isInTheSameConversation(doctorEntity.uuid, patientEntity.uuid) }
                 .forEach { (_, sessions) ->
                     sessions.forEach { it.sendMessageIfOpened(responseSocketMessage) }
                 }
@@ -140,7 +141,7 @@ class ChatHandler : TextWebSocketHandler() {
         val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
         chatSessions.entries
-                .filter { it.key.isInTheSameConversation(doctorEntity.email, patientEntity.email) }
+                .filter { it.key.isInTheSameConversation(doctorEntity.uuid, patientEntity.uuid) }
                 .forEach { (_, sessions) ->
                     sessions.forEach { it.sendMessageIfOpened(responseSocketMessage) }
                 }
@@ -151,25 +152,21 @@ class ChatHandler : TextWebSocketHandler() {
             requestSocketMessage: TextMessage,
             principal: WebSocketPrincipal
     ): Boolean {
-        val conversationEntity = conversationService.getConversation(principal.email, principal.recipientEmail, principal.isPatient)
+        val conversationEntity = conversationService.getConversation(principal.uuid, principal.recipientUuid, principal.isPatient)
                 ?: return false
-
-        log.info { "got conversation" }
 
         val messageWrapper = Gson().fromJson(requestSocketMessage.payload, MessageRequestWrapper::class.java)
         val messageRequest = unwrapRequest(messageWrapper)
 
-        log.info { "unwrap request: messageRequest" }
-
         when (messageRequest) {
             is TextMessageRequest -> {
                 val messageEntity = toEntityText(messageRequest, principal.isPatient, conversationEntity)
-                val patientEntity = patientRepository.findByEmail(principal.patientEmail)
-                val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail)
+                val patientEntity = patientRepository.findById(principal.patientUuid).orElse(null) ?: return false
+                val doctorEntity = doctorRepository.findById(principal.doctorUuid).orElse(null) ?: return false
 
                 conversationService.addMessage(messageEntity, conversationEntity)
 
-                val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity!!, doctorEntity!!))
+                val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity, doctorEntity))
                 val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
                 chatSessions.entries
@@ -182,8 +179,8 @@ class ChatHandler : TextWebSocketHandler() {
                 val callActionRequest = toDomainCallAction(messageRequest)
                 val callStatusResponse = callRepository.onCallActionRequest(
                         callActionRequest,
-                        principal.patientEmail,
-                        principal.doctorEmail,
+                        principal.patientUuid,
+                        principal.doctorUuid,
                         principal.isPatient
                 ) ?: return false
 
@@ -200,12 +197,12 @@ class ChatHandler : TextWebSocketHandler() {
             callStatusResponse: CallStatusResponse
     ) {
         val messageEntity = toEntityCallAction(callStatusResponse, conversationEntity)
-        val patientEntity = patientRepository.findByEmail(principal.patientEmail)
-        val doctorEntity = doctorRepository.findByEmail(principal.doctorEmail)
+        val patientEntity = patientRepository.findById(principal.patientUuid).orElse(null) ?: return
+        val doctorEntity = doctorRepository.findById(principal.doctorUuid).orElse(null) ?: return
 
         conversationService.addMessage(messageEntity, conversationEntity)
 
-        val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity!!, doctorEntity!!))
+        val messageResponse = wrapResponse(toResponse(messageEntity, patientEntity, doctorEntity))
         val responseSocketMessage = TextMessage(Gson().toJson(messageResponse))
 
         chatSessions.entries
@@ -218,13 +215,13 @@ class ChatHandler : TextWebSocketHandler() {
     //region utils
 
     private fun WebSocketPrincipal.isInTheSameConversation(principal: WebSocketPrincipal): Boolean {
-        return principal.email == email && principal.recipientEmail == recipientEmail
-                || principal.email == recipientEmail && principal.recipientEmail == email
+        return principal.uuid == uuid && principal.recipientUuid == recipientUuid
+                || principal.uuid == recipientUuid && principal.recipientUuid == uuid
     }
 
-    private fun WebSocketPrincipal.isInTheSameConversation(doctorEmail: String, patientEmail: String): Boolean {
-        return doctorEmail == email && patientEmail == recipientEmail
-                || doctorEmail == recipientEmail && patientEmail == email
+    private fun WebSocketPrincipal.isInTheSameConversation(doctorUuid: String, patientUuid: String): Boolean {
+        return doctorUuid == uuid && patientUuid == recipientUuid
+                || doctorUuid == recipientUuid && patientUuid == uuid
     }
 
     private fun chatSessionsLogInfo(): String {
@@ -239,7 +236,7 @@ class ChatHandler : TextWebSocketHandler() {
     private fun WebSocketSession?.sendMessageIfOpened(message: TextMessage) =
             this?.takeIf { it.isOpen }?.sendMessage(message)
 
-    private val WebSocketSession.email: String?
+    private val WebSocketSession.uuid: String?
         get() = this.principal?.name
 
     private val WebSocketSession.webSocketPrincipal: WebSocketPrincipal?

@@ -20,7 +20,7 @@ import java.security.Principal
 class WebSocketConfiguration : WebSocketConfigurer {
 
     companion object {
-        private const val RECIPIENT_EMAIL_HEADER = "recipient-email"
+        private const val RECIPIENT_UUID_HEADER = "recipient-uuid"
     }
 
     @Autowired
@@ -40,13 +40,13 @@ class WebSocketConfiguration : WebSocketConfigurer {
                         object : DefaultHandshakeHandler() {
                             override fun determineUser(request: ServerHttpRequest, wsHandler: WebSocketHandler, attributes: MutableMap<String, Any>): Principal? {
                                 val user = super.determineUser(request, wsHandler, attributes) ?: return null
-                                val recipientEmail = request.headers[RECIPIENT_EMAIL_HEADER]?.firstOrNull() ?: return null
+                                val recipientUuid = request.headers[RECIPIENT_UUID_HEADER]?.firstOrNull() ?: return null
 
                                 val doctor = doctorRepository.findByEmail(user.name)
-                                if (doctor != null) return WebSocketPrincipal(user.name, recipientEmail, false)
+                                if (doctor != null) return WebSocketPrincipal(doctor.uuid, recipientUuid, false)
 
                                 val patient = patientRepository.findByEmail(user.name)
-                                if (patient != null) return WebSocketPrincipal(user.name, recipientEmail, true)
+                                if (patient != null) return WebSocketPrincipal(patient.uuid, recipientUuid, true)
 
                                 return null
                             }

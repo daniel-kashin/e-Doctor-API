@@ -3,15 +3,15 @@ package com.edoctor.api.configuration.socket
 import java.security.Principal
 
 data class WebSocketPrincipal(
-        val email: String,
-        val recipientEmail: String,
+        val uuid: String,
+        val recipientUuid: String,
         val isPatient: Boolean
 ) : Principal {
 
-    val patientEmail = if (isPatient) email else recipientEmail
+    val patientUuid = if (isPatient) uuid else recipientUuid
 
-    val doctorEmail = if (isPatient) recipientEmail else email
+    val doctorUuid = if (isPatient) recipientUuid else uuid
 
-    override fun getName() = email
+    override fun getName() = uuid
 
 }

@@ -32,17 +32,17 @@ class ConversationService {
 
     @Transactional
     fun getConversation(
-            currentUserEmail: String,
-            recipientEmail: String,
+            currentUserUuid: String,
+            recipientUuid: String,
             currentUserIsPatient: Boolean
     ): ConversationEntity? {
-        val patientEmail = if (currentUserIsPatient) currentUserEmail else recipientEmail
-        val doctorEmail = if (currentUserIsPatient) recipientEmail else currentUserEmail
+        val patientUuid = if (currentUserIsPatient) currentUserUuid else recipientUuid
+        val doctorUuid = if (currentUserIsPatient) recipientUuid else currentUserUuid
 
-        return conversationRepository.findByPatientEmailAndDoctorEmail(patientEmail, doctorEmail)
+        return conversationRepository.findByPatientUuidAndDoctorUuid(patientUuid, doctorUuid)
                 ?: run {
-                    val patient = patientRepository.findByEmail(patientEmail) ?: return null
-                    val doctor = doctorRepository.findByEmail(doctorEmail) ?: return null
+                    val patient = patientRepository.findById(patientUuid).orElse(null) ?: return null
+                    val doctor = doctorRepository.findById(doctorUuid).orElse(null) ?: return null
                     ConversationEntity(
                             givenUuid = randomUUID(),
                             patient = patient,

@@ -56,18 +56,18 @@ class ImagesController {
     fun sendImageToUser(
             authentication: OAuth2Authentication,
             @RequestPart("image", required = false) image: MultipartFile,
-            @RequestParam recipientEmail: String
+            @RequestParam recipientUuid: String
     ): ResponseEntity<String> {
         val principal = authentication.principal as User
 
         val webSocketPrincipal: WebSocketPrincipal = let {
             val doctor = doctorRepository.findByEmail(principal.username)
             if (doctor != null) {
-                WebSocketPrincipal(principal.username, recipientEmail, false)
+                WebSocketPrincipal(doctor.uuid, recipientUuid, false)
             } else {
                 val patient = patientRepository.findByEmail(principal.username)
                 if (patient != null) {
-                    WebSocketPrincipal(principal.username, recipientEmail, true)
+                    WebSocketPrincipal(patient.uuid, recipientUuid, true)
                 } else {
                     null
                 }

@@ -37,11 +37,11 @@ class MessageController {
     private lateinit var doctorRepository: DoctorRepository
 
     // TODO: add getting by pages
-    @GetMapping("/messages", params = ["fromTimestamp", "recipientEmail"])
+    @GetMapping("/messages", params = ["fromTimestamp", "recipientUuid"])
     fun getMessages(
             authentication: OAuth2Authentication,
             @RequestParam("fromTimestamp") fromTimestamp: Long,
-            @RequestParam("recipientEmail") recipientEmail: String
+            @RequestParam("recipientUuid") recipientUuid: String
     ): ResponseEntity<MessagesResponse> {
         val principal = authentication.principal as User
 
@@ -50,16 +50,16 @@ class MessageController {
                 ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val (patientEntity, doctorEntity) = if (user is PatientEntity) {
-            val doctorEntity = doctorRepository.findByEmail(recipientEmail) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            val doctorEntity = doctorRepository.findById(recipientUuid).orElse(null) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
             user to doctorEntity
         } else if (user is DoctorEntity) {
-            val patientEntity = patientRepository.findByEmail(recipientEmail) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+            val patientEntity = patientRepository.findById(recipientUuid).orElse(null) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
             patientEntity to user
         } else {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        val conversation = conversationRepository.findByPatientEmailAndDoctorEmail(patientEntity.email, doctorEntity.email)
+        val conversation = conversationRepository.findByPatientUuidAndDoctorUuid(patientEntity.uuid, doctorEntity.uuid)
                 ?: return ResponseEntity.ok(MessagesResponse(emptyList()))
 
         val messages = messageRepository

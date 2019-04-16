@@ -9,10 +9,4 @@ interface ConversationRepository : JpaRepository<ConversationEntity, String> {
 
     fun findByPatientUuidAndDoctorUuid(patientUuid: String, doctorUuid: String) : ConversationEntity?
 
-    fun findByPatientEmailAndDoctorEmail(patientEmail: String, doctorEmail: String) : ConversationEntity?
-
-    fun findByPatientUuid(patientUuid: String) : List<ConversationEntity>
-
-    fun findByDoctorUuid(doctorUuid: String) : List<ConversationEntity>
-
 }
