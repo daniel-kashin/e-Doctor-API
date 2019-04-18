@@ -1,7 +1,7 @@
 package com.edoctor.api.controller
 
 import com.edoctor.api.entities.network.request.BodyParameterTypeWrapper
-import com.edoctor.api.entities.network.request.SynchronizeBodyParametersModel
+import com.edoctor.api.entities.network.model.record.SynchronizeBodyParametersModel
 import com.edoctor.api.entities.network.response.BodyParametersResponse
 import com.edoctor.api.mapper.BodyParameterMapper.toEntityFromWrapper
 import com.edoctor.api.mapper.BodyParameterMapper.toWrapperFromEntity

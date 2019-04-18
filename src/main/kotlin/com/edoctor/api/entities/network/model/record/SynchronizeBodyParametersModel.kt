@@ -1,4 +1,4 @@
-package com.edoctor.api.entities.network.request
+package com.edoctor.api.entities.network.model.record
 
 import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 
