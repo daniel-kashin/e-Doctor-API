@@ -8,14 +8,14 @@ import java.util.*
 object BodyParameterMapper {
 
     fun toNetwork(entity: BodyParameterEntity): BodyParameterWrapper = entity.run {
-        BodyParameterWrapper(uuid, measurementTimestamp, type, firstValue, secondValue, customModelName, customModelUnit)
+        BodyParameterWrapper(uuid, measurementTimestamp, updateTimestamp, isDeleted, type, firstValue, secondValue, customModelName, customModelUnit)
     }
 
-    fun toEntity(
+    fun toEntityFromWrapper(
             wrapper: BodyParameterWrapper,
             patientEntity: PatientEntity
     ): BodyParameterEntity = wrapper.run {
-        BodyParameterEntity(UUID.fromString(uuid), type, patientEntity, measurementTimestamp, firstValue, secondValue, customModelName, customModelUnit)
+        BodyParameterEntity(UUID.fromString(uuid), type, patientEntity, updateTimestamp, isDeleted, measurementTimestamp, firstValue, secondValue, customModelName, customModelUnit)
     }
 
 }
