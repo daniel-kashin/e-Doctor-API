@@ -1,9 +1,12 @@
 package com.edoctor.api.entities.network.model.record
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class BodyParameterWrapper(
         val uuid: String,
         val measurementTimestamp: Long,
         val updateTimestamp: Long,
+        @get:JsonProperty("isDeleted")
         val isDeleted: Boolean,
         val type: Int,
         val firstValue: Double,
