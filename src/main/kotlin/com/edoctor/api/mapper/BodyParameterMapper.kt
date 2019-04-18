@@ -8,12 +8,13 @@ import java.util.*
 object BodyParameterMapper {
 
     fun toWrapperFromEntity(entity: BodyParameterEntity): BodyParameterWrapper = entity.run {
-        BodyParameterWrapper(uuid, measurementTimestamp, updateTimestamp, isDeleted, type, firstValue, secondValue, customModelName, customModelUnit)
+        BodyParameterWrapper(uuid, measurementTimestamp, isDeleted, type, firstValue, secondValue, customModelName, customModelUnit)
     }
 
     fun toEntityFromWrapper(
             wrapper: BodyParameterWrapper,
-            patientEntity: PatientEntity
+            patientEntity: PatientEntity,
+            updateTimestamp: Long
     ): BodyParameterEntity = wrapper.run {
         BodyParameterEntity(UUID.fromString(uuid), type, patientEntity, updateTimestamp, isDeleted, measurementTimestamp, firstValue, secondValue, customModelName, customModelUnit)
     }

@@ -1,8 +1,10 @@
 package com.edoctor.api.controller
 
+import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 import com.edoctor.api.entities.network.request.BodyParameterTypeWrapper
 import com.edoctor.api.entities.network.model.record.SynchronizeBodyParametersModel
 import com.edoctor.api.entities.network.response.BodyParametersResponse
+import com.edoctor.api.entities.storage.BodyParameterEntity
 import com.edoctor.api.mapper.BodyParameterMapper.toEntityFromWrapper
 import com.edoctor.api.mapper.BodyParameterMapper.toWrapperFromEntity
 import com.edoctor.api.mapper.MedicalRecordTypeMapper
@@ -120,8 +122,12 @@ class ParametersController {
         synchronized(mutexFactory.getMutex(principal.username)) {
             val currentTimestamp = currentUnixTime()
 
+            log.info { "currentTimestamp = $currentTimestamp" }
+
             val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
                     ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+            log.info { "synchronizeTimestamp = ${request.synchronizeTimestamp}" }
 
             val localParameters = bodyParameterRepository
                     .getBodyParameterEntitiesByUpdateTimestampGreaterThanAndPatientUuid(
@@ -129,7 +135,11 @@ class ParametersController {
                             patient.uuid
                     )
 
+            log.info { "localParameters = $localParameters" }
+
             val remoteParameters = request.bodyParameters
+
+            log.info { "remoteParameters = $remoteParameters" }
 
             val mergedParameters = localParameters
                     .asSequence()
@@ -137,27 +147,35 @@ class ParametersController {
                     .plus(remoteParameters.map { it.uuid })
                     .distinct()
                     .filterNotNull()
-                    .mapNotNull { uuid ->
-                        val local = localParameters.firstOrNull { it.uuid == uuid }
+                    .mapNotNull<String, Any> { uuid ->
                         val remote = remoteParameters.firstOrNull { it.uuid == uuid }
-
-                        if (local == null && remote != null) {
-                            remote.copy(updateTimestamp = currentTimestamp)
-                        } else if (local != null && remote == null) {
-                            toWrapperFromEntity(local)
-                        } else if (local != null && remote != null) {
-                            local.takeIf { it.updateTimestamp > remote.updateTimestamp }
-                                    ?.let { toWrapperFromEntity(it) }
-                                    ?: remote.copy(updateTimestamp = currentTimestamp)
-                        } else {
-                            null
+                        val local = localParameters.firstOrNull { it.uuid == uuid }
+                        when {
+                            remote != null -> remote
+                            local != null -> local
+                            else -> null
                         }
                     }
                     .toList()
 
-            bodyParameterRepository.saveAll(mergedParameters.map { toEntityFromWrapper(it, patient) })
+            log.info { "mergedParameters = $mergedParameters" }
 
-            return ResponseEntity.ok(SynchronizeBodyParametersModel(mergedParameters, currentTimestamp))
+            val parametersToSave = mergedParameters.mapNotNull {
+                when (it) {
+                    is BodyParameterWrapper -> toEntityFromWrapper(it, patient, currentTimestamp)
+                    else -> null
+                }
+            }
+            bodyParameterRepository.saveAll(parametersToSave)
+
+            val parametersToReturn = mergedParameters.mapNotNull {
+                when (it) {
+                    is BodyParameterWrapper -> it
+                    is BodyParameterEntity -> toWrapperFromEntity(it)
+                    else -> null
+                }
+            }
+            return ResponseEntity.ok(SynchronizeBodyParametersModel(parametersToReturn, currentTimestamp))
         }
     }
 
