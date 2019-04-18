@@ -1,10 +1,10 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 import com.edoctor.api.entities.network.request.BodyParameterTypeWrapper
+import com.edoctor.api.entities.network.request.SynchronizeBodyParametersModel
 import com.edoctor.api.entities.network.response.BodyParametersResponse
 import com.edoctor.api.mapper.BodyParameterMapper.toEntityFromWrapper
-import com.edoctor.api.mapper.BodyParameterMapper.toNetwork
+import com.edoctor.api.mapper.BodyParameterMapper.toWrapperFromEntity
 import com.edoctor.api.mapper.MedicalRecordTypeMapper
 import com.edoctor.api.repositories.BodyParameterRepository
 import com.edoctor.api.repositories.DoctorRepository
@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import com.edoctor.api.utils.MutexFactory
+import com.edoctor.api.utils.currentUnixTime
+
 
 @RestController
 class ParametersController {
@@ -35,6 +38,8 @@ class ParametersController {
 
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
+
+    private val mutexFactory: MutexFactory<String> = MutexFactory()
 
     @GetMapping("/latestParametersForDoctor")
     @Transactional
@@ -65,7 +70,7 @@ class ParametersController {
                                     patient.uuid
                             )
                 }
-                .map { toNetwork(it) }
+                .map { toWrapperFromEntity(it) }
 
         return ResponseEntity.ok(BodyParametersResponse(parameters))
     }
@@ -99,9 +104,61 @@ class ParametersController {
                         type.customModelUnit,
                         patient.uuid
                 )
-                .map { toNetwork(it) }
+                .map { toWrapperFromEntity(it) }
 
         return ResponseEntity.ok(BodyParametersResponse(parameters))
+    }
+
+    @PostMapping("/synchronizeParametersForPatient")
+    @Transactional
+    fun synchronizeParameters(
+            @RequestBody request: SynchronizeBodyParametersModel,
+            authentication: OAuth2Authentication
+    ): ResponseEntity<SynchronizeBodyParametersModel> {
+        val principal = authentication.principal as User
+
+        synchronized(mutexFactory.getMutex(principal.username)) {
+            val currentTimestamp = currentUnixTime()
+
+            val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                    ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+            val localParameters = bodyParameterRepository
+                    .getBodyParameterEntitiesByUpdateTimestampGreaterThanAndPatientUuid(
+                            request.synchronizeTimestamp,
+                            patient.uuid
+                    )
+
+            val remoteParameters = request.bodyParameters
+
+            val mergedParameters = localParameters
+                    .asSequence()
+                    .map { it.uuid }
+                    .plus(remoteParameters.map { it.uuid })
+                    .distinct()
+                    .filterNotNull()
+                    .mapNotNull { uuid ->
+                        val local = localParameters.firstOrNull { it.uuid == uuid }
+                        val remote = remoteParameters.firstOrNull { it.uuid == uuid }
+
+                        if (local == null && remote != null) {
+                            remote.copy(updateTimestamp = currentTimestamp)
+                        } else if (local != null && remote == null) {
+                            toWrapperFromEntity(local)
+                        } else if (local != null && remote != null) {
+                            local.takeIf { it.updateTimestamp > remote.updateTimestamp }
+                                    ?.let { toWrapperFromEntity(it) }
+                                    ?: remote.copy(updateTimestamp = currentTimestamp)
+                        } else {
+                            null
+                        }
+                    }
+                    .toList()
+
+            bodyParameterRepository.saveAll(mergedParameters.map { toEntityFromWrapper(it, patient) })
+
+            return ResponseEntity.ok(SynchronizeBodyParametersModel(mergedParameters, currentTimestamp))
+        }
     }
 
 }

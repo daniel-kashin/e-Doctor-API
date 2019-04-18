@@ -7,6 +7,7 @@ import com.edoctor.api.entities.domain.CallActionRequest.CallAction.*
 import com.edoctor.api.entities.domain.CallStatusResponse
 import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus
 import com.edoctor.api.entities.domain.CallStatusResponse.CallStatus.*
+import com.edoctor.api.utils.MutexFactory
 import mu.KotlinLogging.logger
 
 @Repository
@@ -15,6 +16,8 @@ class CallRepository {
     private val log = logger { }
 
     private val conversationsToCalls: MutableMap<Call, CallStatus> = hashMapOf()
+
+    private val mutexFactory: MutexFactory<String> = MutexFactory()
 
     fun findActiveCall(
             patientUuid: String,
@@ -47,7 +50,7 @@ class CallRepository {
             patientUuid: String,
             doctorUuid: String,
             isPatient: Boolean
-    ): CallStatusResponse? = synchronized(callActionRequest.callUuid) {
+    ): CallStatusResponse? = synchronized(mutexFactory.getMutex(callActionRequest.callUuid)) {
         val currentCallToInfo = conversationsToCalls.entries.firstOrNull { it.key.uuid == callActionRequest.callUuid }
 
         return when (callActionRequest.callAction) {

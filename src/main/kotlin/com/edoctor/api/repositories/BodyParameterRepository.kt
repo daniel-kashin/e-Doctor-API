@@ -15,6 +15,11 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
             "GROUP BY e.type, e.customModelName, e.customModelUnit")
     fun getDistinctTypesForPatient(patientUuid: String): List<BodyParameterEntityType>
 
+    fun getBodyParameterEntitiesByUpdateTimestampGreaterThanAndPatientUuid(
+            timestamp: Long,
+            patientUuid: String
+    ) : List<BodyParameterEntity>
+
     fun findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
             type: Int,
             customModelName: String?,
@@ -28,15 +33,5 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
             customModelUnit: String?,
             patientUuid: String
     ): List<BodyParameterEntity>
-
-    fun findByUuidAndPatientUuid(
-            uuid: String,
-            patientUuid: String
-    ): BodyParameterEntity?
-
-    fun deleteByUuidAndPatientUuid(
-            uuid: String,
-            patientUuid: String
-    )
 
 }
