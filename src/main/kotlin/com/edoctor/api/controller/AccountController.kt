@@ -60,7 +60,7 @@ class AccountController {
         val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
         if (patient != null) {
             val requestPatient = userRequestWrapper.patientModel
-            return if (requestPatient == null || requestPatient.email != patient.email) {
+            return if (requestPatient == null || requestPatient.uuid != patient.uuid) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
                 val newImageUuid = updateImageInStorage(patient.imageUuid, image)
@@ -80,7 +80,7 @@ class AccountController {
         val doctor = doctorRepository.findByEmail(principal.username)?.also { log.info { "got doctor: $it" } }
         if (doctor != null) {
             val requestDoctor = userRequestWrapper.doctorModel
-            return if (requestDoctor == null || requestDoctor.email != doctor.email) {
+            return if (requestDoctor == null || requestDoctor.uuid != doctor.uuid) {
                 ResponseEntity(HttpStatus.CONFLICT)
             } else {
                 val newImageUuid = updateImageInStorage(doctor.imageUuid, image)

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 sealed class UserModel {
     abstract val uuid: String
-    abstract val email: String
     abstract val fullName: String?
     abstract val city: String?
     abstract val dateOfBirthTimestamp: Long?
@@ -14,7 +13,6 @@ sealed class UserModel {
 
 data class PatientModel(
         override val uuid: String,
-        override val email: String,
         override val city: String?,
         override val fullName: String?,
         override val dateOfBirthTimestamp: Long?,
@@ -26,7 +24,6 @@ data class PatientModel(
 
 data class DoctorModel(
         override val uuid: String,
-        override val email: String,
         override val city: String?,
         override val fullName: String?,
         override val dateOfBirthTimestamp: Long?,

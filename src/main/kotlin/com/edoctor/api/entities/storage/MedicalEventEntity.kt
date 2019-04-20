@@ -19,6 +19,12 @@ class MedicalEventEntity(
         @JoinColumn(name = "patientUuid", nullable = false)
         val patient: PatientEntity,
 
+        @Column(nullable = false)
+        val isDeleted: Boolean,
+
+        @Column(nullable = false)
+        val updateTimestamp: Long,
+
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "doctorUuid", nullable = true)
         val doctorCreator: DoctorEntity?,
