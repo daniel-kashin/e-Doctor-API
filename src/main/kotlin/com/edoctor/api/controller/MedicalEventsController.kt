@@ -1,7 +1,11 @@
 package com.edoctor.api.controller
 
+import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 import com.edoctor.api.entities.network.model.record.MedicalEventWrapper
+import com.edoctor.api.entities.network.model.record.SynchronizeBodyParametersModel
+import com.edoctor.api.entities.network.model.record.SynchronizeEventsModel
 import com.edoctor.api.entities.network.response.MedicalEventsResponse
+import com.edoctor.api.entities.storage.MedicalEventEntity
 import com.edoctor.api.entities.storage.MedicalEventEntityType
 import com.edoctor.api.mapper.MedicalEventMapper
 import com.edoctor.api.mapper.MedicalRecordTypeMapper
@@ -10,6 +14,8 @@ import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.MedicalAccessesRepository
 import com.edoctor.api.repositories.MedicalEventRepository
 import com.edoctor.api.repositories.PatientRepository
+import com.edoctor.api.utils.MutexFactory
+import com.edoctor.api.utils.currentUnixTime
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -36,22 +42,7 @@ class MedicalEventsController {
     @Autowired
     private lateinit var doctorRepository: DoctorRepository
 
-    @GetMapping("/medicalEventsForPatient")
-    @Transactional
-    fun getEventsForPatient(
-            authentication: OAuth2Authentication
-    ): ResponseEntity<MedicalEventsResponse> {
-        val principal = authentication.principal as User
-
-        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
-                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
-
-        val events = user.medicalEvents
-                .filter { it.doctorCreator == null || it.isAddedFromDoctor }
-                .map { MedicalEventMapper.toNetwork(it) }
-
-        return ResponseEntity.ok(MedicalEventsResponse(events))
-    }
+    private val mutexFactory: MutexFactory<String> = MutexFactory()
 
     @GetMapping("/medicalEventsForDoctor")
     @Transactional
@@ -70,62 +61,87 @@ class MedicalEventsController {
                 .map { MedicalRecordTypeMapper.toDomain(it) }
 
         val events = patient.medicalEvents
+                .asSequence()
+                .filter { !it.isDeleted }
                 .filter { toDomain(MedicalEventEntityType(it.type)) in domainAccesses }
-                .map { MedicalEventMapper.toNetwork(it) }
+                .map { MedicalEventMapper.toWrapperFromEntity(it) }
+                .toList()
 
         return ResponseEntity.ok(MedicalEventsResponse(events))
     }
 
-    @PostMapping("/addOrEditMedicalEventForPatient")
+
+    @PostMapping("/synchronizeEventsForPatient")
     @Transactional
-    fun addOrEditMedicalEventForPatient(
-            @RequestBody event: MedicalEventWrapper,
+    fun synchronizeEvents(
+            @RequestBody request: SynchronizeEventsModel,
             authentication: OAuth2Authentication
-    ): ResponseEntity<MedicalEventWrapper> {
+    ): ResponseEntity<SynchronizeEventsModel> {
         val principal = authentication.principal as User
 
-        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
-                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        synchronized(mutexFactory.getMutex(principal.username)) {
+            val currentTimestamp = currentUnixTime()
 
-        val existing = medicalEventRepository.findByUuidAndPatientUuid(event.uuid, user.uuid)
+            log.info { "currentTimestamp = $currentTimestamp" }
 
-        if (existing == null) {
-            medicalEventRepository.save(MedicalEventMapper.toEntity(event, user, null))
-        } else {
-            medicalEventRepository.save(
-                    existing.apply {
-                        timestamp = event.timestamp
-                        endTimestamp = event.endTimestamp
-                        name = event.name
-                        clinic = event.clinic
-                        doctorName = event.doctorName
-                        doctorSpecialization = event.doctorSpecialization
-                        symptoms = event.symptoms
-                        diagnosis = event.diagnosis
-                        recipe = event.recipe
-                        comment = event.comment
-                        isAddedFromDoctor = event.isAddedFromDoctor
+            val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
+                    ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+            log.info { "synchronizeTimestamp = ${request.synchronizeTimestamp}" }
+
+            val localEvents = medicalEventRepository
+                    .getMedicalEventEntitiesByUpdateTimestampGreaterThanAndPatientUuid(
+                            request.synchronizeTimestamp,
+                            patient.uuid
+                    )
+
+            log.info { "localEvents = $localEvents" }
+
+            val remoteEvents = request.events
+
+            log.info { "remoteEvents = $remoteEvents" }
+
+            val mergedEvents = localEvents
+                    .asSequence()
+                    .map { it.uuid }
+                    .plus(remoteEvents.map { it.uuid })
+                    .distinct()
+                    .filterNotNull()
+                    .mapNotNull<String, Any> { uuid ->
+                        val remote = remoteEvents.firstOrNull { it.uuid == uuid }
+                        val local = localEvents.firstOrNull { it.uuid == uuid }
+                        when {
+                            remote != null -> remote
+                            local != null -> local
+                            else -> null
+                        }
                     }
-            )
+                    .toList()
+
+            log.info { "mergedEvents = $mergedEvents" }
+
+            val eventsToSave = mergedEvents.mapNotNull {
+                when (it) {
+                    is MedicalEventWrapper -> {
+                        val doctorCreator = it.doctorCreatorUuid
+                                ?.let { uuid -> doctorRepository.findById(uuid) }
+                                ?.orElse(null)
+                        MedicalEventMapper.toEntityFromWrapper(it, patient, doctorCreator, currentTimestamp)
+                    }
+                    else -> null
+                }
+            }
+            medicalEventRepository.saveAll(eventsToSave)
+
+            val eventsToReturn = mergedEvents.mapNotNull {
+                when (it) {
+                    is MedicalEventWrapper -> it
+                    is MedicalEventEntity -> MedicalEventMapper.toWrapperFromEntity(it)
+                    else -> null
+                }
+            }
+            return ResponseEntity.ok(SynchronizeEventsModel(eventsToReturn, currentTimestamp))
         }
-
-        return ResponseEntity.ok(event)
-    }
-
-    @PostMapping("/deleteMedicalEventForPatient")
-    @Transactional
-    fun deleteParameterForPatient(
-            @RequestBody event: MedicalEventWrapper,
-            authentication: OAuth2Authentication
-    ): ResponseEntity<String> {
-        val principal = authentication.principal as User
-
-        val user = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
-                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
-
-        medicalEventRepository.deleteByUuidAndPatientUuid(event.uuid, user.uuid)
-
-        return ResponseEntity.noContent().build()
     }
 
 }

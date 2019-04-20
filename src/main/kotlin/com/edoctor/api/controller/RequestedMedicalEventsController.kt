@@ -4,9 +4,9 @@ import com.edoctor.api.entities.network.model.record.MedicalEventWrapper
 import com.edoctor.api.entities.network.response.MedicalEventsResponse
 import com.edoctor.api.mapper.MedicalEventMapper
 import com.edoctor.api.repositories.DoctorRepository
-import com.edoctor.api.repositories.MedicalAccessesRepository
 import com.edoctor.api.repositories.MedicalEventRepository
 import com.edoctor.api.repositories.PatientRepository
+import com.edoctor.api.utils.currentUnixTime
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -33,26 +33,6 @@ class RequestedMedicalEventsController {
     @Autowired
     private lateinit var chatHandler: ChatHandler
 
-    @GetMapping("/requestedMedicalEventsForPatient")
-    @Transactional
-    fun getRequestedEventsForPatient(
-            authentication: OAuth2Authentication,
-            @RequestParam("doctorUuid") doctorUuid: String
-    ): ResponseEntity<MedicalEventsResponse> {
-        val principal = authentication.principal as User
-
-        val patient = patientRepository.findByEmail(principal.username)?.also { log.info { "got patient: $it" } }
-                ?: return ResponseEntity(HttpStatus.UNAUTHORIZED)
-        val doctor = doctorRepository.findById(doctorUuid).orElse(null)?.also { log.info { "got doctor: $it" } }
-                ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-
-        val events = patient.medicalEvents
-                .filter { it.doctorCreator?.uuid == doctor.uuid }
-                .map { MedicalEventMapper.toNetwork(it) }
-
-        return ResponseEntity.ok(MedicalEventsResponse(events))
-    }
-
     @GetMapping("/requestedMedicalEventsForDoctor")
     @Transactional
     fun getRequestedEventsForDoctor(
@@ -68,7 +48,7 @@ class RequestedMedicalEventsController {
 
         val events = patient.medicalEvents
                 .filter { it.doctorCreator?.uuid == doctor.uuid }
-                .map { MedicalEventMapper.toNetwork(it) }
+                .map { MedicalEventMapper.toWrapperFromEntity(it) }
 
         return ResponseEntity.ok(MedicalEventsResponse(events))
     }
@@ -93,13 +73,13 @@ class RequestedMedicalEventsController {
             return ResponseEntity(HttpStatus.CONFLICT)
         }
 
-        val entityToSave = MedicalEventMapper.toEntity(event, patient, doctor)
+        val entityToSave = MedicalEventMapper.toEntityFromWrapper(event, patient, doctor, currentUnixTime())
 
         medicalEventRepository.save(entityToSave)
 
         chatHandler.onMedicalRecordRequest(patient, doctor)
 
-        return ResponseEntity.ok(MedicalEventMapper.toNetwork(entityToSave))
+        return ResponseEntity.ok(MedicalEventMapper.toWrapperFromEntity(entityToSave))
     }
 
 }

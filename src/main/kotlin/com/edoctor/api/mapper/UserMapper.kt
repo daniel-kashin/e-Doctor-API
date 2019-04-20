@@ -13,7 +13,6 @@ object UserMapper {
     fun toModel(user: PatientEntity): PatientModel = user.run {
         PatientModel(
                 uuid = uuid,
-                email = email,
                 city = city,
                 fullName = fullName,
                 dateOfBirthTimestamp = dateOfBirthTimestamp,
@@ -26,7 +25,6 @@ object UserMapper {
     fun toModel(user: DoctorEntity): DoctorModel = user.run {
         DoctorModel(
                 uuid = uuid,
-                email = email,
                 city = city,
                 fullName = fullName,
                 dateOfBirthTimestamp = dateOfBirthTimestamp,

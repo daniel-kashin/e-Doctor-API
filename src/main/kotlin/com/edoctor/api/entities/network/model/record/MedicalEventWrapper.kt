@@ -7,6 +7,8 @@ data class MedicalEventWrapper(
         val timestamp: Long,
         val type: Int,
         val doctorCreatorUuid: String?,
+        @get:JsonProperty("isDeleted")
+        val isDeleted: Boolean,
         @get:JsonProperty("isAddedFromDoctor")
         val isAddedFromDoctor: Boolean,
         val endTimestamp: Long? = null,

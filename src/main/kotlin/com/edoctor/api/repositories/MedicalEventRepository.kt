@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository
 @Repository
 interface MedicalEventRepository : JpaRepository<MedicalEventEntity, String> {
 
-    fun findByUuidAndPatientUuid(uuid: String, patientUuid: String): MedicalEventEntity?
+    fun getMedicalEventEntitiesByUpdateTimestampGreaterThanAndPatientUuid(
+            timestamp: Long,
+            patientUuid: String
+    ) : List<MedicalEventEntity>
 
-    fun deleteByUuidAndPatientUuid(uuid: String, patientUuid: String)
+    fun findByUuidAndPatientUuid(uuid: String, patientUuid: String): MedicalEventEntity?
 
 }

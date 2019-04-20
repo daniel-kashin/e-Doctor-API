@@ -20,6 +20,12 @@ class BodyParameterEntity(
         val patient: PatientEntity,
 
         @Column(nullable = false)
+        val updateTimestamp: Long,
+
+        @Column(nullable = false)
+        val isDeleted: Boolean,
+
+        @Column(nullable = false)
         var measurementTimestamp: Long,
 
         @Column(nullable = false)

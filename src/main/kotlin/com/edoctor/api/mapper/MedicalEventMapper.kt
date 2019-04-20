@@ -8,18 +8,19 @@ import java.util.*
 
 object MedicalEventMapper {
 
-    fun toNetwork(
+    fun toWrapperFromEntity(
             entity: MedicalEventEntity
     ): MedicalEventWrapper = entity.run {
-        MedicalEventWrapper(uuid, timestamp, type, doctorCreator?.uuid, isAddedFromDoctor, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
+        MedicalEventWrapper(uuid, timestamp, type, doctorCreator?.uuid, isDeleted, isAddedFromDoctor, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
     }
 
-    fun toEntity(
+    fun toEntityFromWrapper(
             wrapper: MedicalEventWrapper,
             patient: PatientEntity,
-            doctorCreator: DoctorEntity?
+            doctorCreator: DoctorEntity?,
+            updateTimestamp: Long
     ): MedicalEventEntity = wrapper.run {
-        MedicalEventEntity(UUID.fromString(uuid), type, patient, doctorCreator, isAddedFromDoctor, timestamp, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
+        MedicalEventEntity(UUID.fromString(uuid), type, patient, isDeleted, updateTimestamp, doctorCreator, isAddedFromDoctor, timestamp, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
     }
 
 }

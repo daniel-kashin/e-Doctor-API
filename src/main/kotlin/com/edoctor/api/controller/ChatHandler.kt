@@ -114,7 +114,7 @@ class ChatHandler : TextWebSocketHandler() {
     }
 
     fun onMedicalAccessesChanged(patientEntity: PatientEntity, doctorEntity: DoctorEntity) {
-        val conversationEntity = conversationService.getConversation(patientEntity.email, doctorEntity.email, true) ?: return
+        val conversationEntity = conversationService.getConversation(patientEntity.uuid, doctorEntity.uuid, true) ?: return
 
         val messageEntity = toEntityMedicalAccesses(conversationEntity)
 
@@ -131,7 +131,7 @@ class ChatHandler : TextWebSocketHandler() {
     }
 
     fun onMedicalRecordRequest(patientEntity: PatientEntity, doctorEntity: DoctorEntity) {
-        val conversationEntity = conversationService.getConversation(patientEntity.email, doctorEntity.email, true) ?: return
+        val conversationEntity = conversationService.getConversation(patientEntity.uuid, doctorEntity.uuid, true) ?: return
 
         val messageEntity = toEntityMedicalRecordRequest(conversationEntity)
 
