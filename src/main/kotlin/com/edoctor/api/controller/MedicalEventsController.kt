@@ -60,7 +60,7 @@ class MedicalEventsController {
 
         val events = patient.medicalEvents
                 .asSequence()
-                .filter { !it.isDeleted }
+                .filter { !it.deleted }
                 .filter { toDomain(MedicalEventEntityType(it.type)) in domainAccesses }
                 .map { MedicalEventMapper.toWrapperFromEntity(it) }
                 .toList()

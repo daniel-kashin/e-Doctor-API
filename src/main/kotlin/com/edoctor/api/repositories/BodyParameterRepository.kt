@@ -28,12 +28,11 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
             isDeleted: Boolean
     ): BodyParameterEntity?
 
-    fun findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidAndDeleted(
+    fun findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuid(
             type: Int,
             customModelName: String?,
             customModelUnit: String?,
-            patientUuid: String,
-            isDeleted: Boolean
+            patientUuid: String
     ): List<BodyParameterEntity>
 
 }

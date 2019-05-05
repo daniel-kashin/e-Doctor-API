@@ -101,13 +101,13 @@ class ParametersController {
         }
 
         val parameters = bodyParameterRepository
-                .findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidAndDeleted(
+                .findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuid(
                         type.type,
                         type.customModelName,
                         type.customModelUnit,
-                        patient.uuid,
-                        false
+                        patient.uuid
                 )
+                .filter { !it.deleted }
                 .map { toWrapperFromEntity(it) }
 
         return ResponseEntity.ok(BodyParametersResponse(parameters))
