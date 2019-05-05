@@ -14,7 +14,7 @@ class ImageFilesStorage {
     private val log = logger {}
 
     companion object {
-        private const val IMAGES_DIRECTORY = "/Users/Shared/images"
+        private const val IMAGES_DIRECTORY = "/home/ubuntu/smartdoctor/images"
     }
 
     private val imagesDirectory = File(IMAGES_DIRECTORY).also { it.mkdirs() }

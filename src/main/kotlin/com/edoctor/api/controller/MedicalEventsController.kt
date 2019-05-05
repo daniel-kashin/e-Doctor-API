@@ -1,8 +1,6 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 import com.edoctor.api.entities.network.model.record.MedicalEventWrapper
-import com.edoctor.api.entities.network.model.record.SynchronizeBodyParametersModel
 import com.edoctor.api.entities.network.model.record.SynchronizeEventsModel
 import com.edoctor.api.entities.network.response.MedicalEventsResponse
 import com.edoctor.api.entities.storage.MedicalEventEntity
