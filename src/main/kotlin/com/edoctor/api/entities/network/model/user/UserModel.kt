@@ -30,6 +30,10 @@ data class DoctorModel(
         @get:JsonProperty("isMale")
         override val isMale: Boolean?,
         override val relativeImageUrl: String?,
+        @get:JsonProperty("isReadyForConsultation")
+        val isReadyForConsultation: Boolean,
+        @get:JsonProperty("isReadyForAudio")
+        val isReadyForAudio: Int,
         val yearsOfExperience: Int?,
         val category: Int?,
         val specialization: String?,

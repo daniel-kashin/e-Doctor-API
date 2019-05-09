@@ -22,6 +22,12 @@ class DoctorEntity constructor(
 
         imageName: String? = null,
 
+        @Column(nullable = false)
+        var isReadyForConsultation: Boolean = false,
+
+        @Column(nullable = false)
+        var isReadyForAudio: Int = 0,
+
         @Column(nullable = true)
         var yearsOfExperience: Int? = null,
 
