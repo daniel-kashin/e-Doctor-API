@@ -29,6 +29,8 @@ object UserMapper {
                 fullName = fullName,
                 dateOfBirthTimestamp = dateOfBirthTimestamp,
                 isMale = isMale,
+                isReadyForConsultation = isReadyForConsultation,
+                isReadyForAudio = isReadyForAudio,
                 relativeImageUrl = imageUuid?.let { toRelativeImageUrl(it) },
                 yearsOfExperience = yearsOfExperience,
                 category = category,

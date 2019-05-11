@@ -20,11 +20,12 @@ interface BodyParameterRepository : JpaRepository<BodyParameterEntity, String> {
             patientUuid: String
     ) : List<BodyParameterEntity>
 
-    fun findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
+    fun findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidAndDeletedOrderByMeasurementTimestampDesc(
             type: Int,
             customModelName: String?,
             customModelUnit: String?,
-            patientUuid: String
+            patientUuid: String,
+            isDeleted: Boolean
     ): BodyParameterEntity?
 
     fun findAllByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuid(

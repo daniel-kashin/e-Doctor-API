@@ -26,11 +26,14 @@ class DoctorController {
         )
 
         return ResponseEntity.ok(
-                DoctorsResponse(doctorEntities.mapNotNull {
-                    it.takeIf { it.shouldBeSearched() }
-                            ?.let { toWrapper(it) }
-                            ?.doctorModel
-                })
+                DoctorsResponse(doctorEntities
+                        .mapNotNull {
+                            it.takeIf { it.shouldBeSearched() }
+                                    ?.let { toWrapper(it) }
+                                    ?.doctorModel
+                        }
+                        .sortedByDescending { it.isReadyForConsultation }
+                )
         )
     }
 

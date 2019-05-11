@@ -11,7 +11,7 @@ object MedicalEventMapper {
     fun toWrapperFromEntity(
             entity: MedicalEventEntity
     ): MedicalEventWrapper = entity.run {
-        MedicalEventWrapper(uuid, timestamp, type, doctorCreator?.uuid, isDeleted, isAddedFromDoctor, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
+        MedicalEventWrapper(uuid, timestamp, type, doctorCreator?.uuid, deleted, isAddedFromDoctor, endTimestamp, name, clinic, doctorName, doctorSpecialization, symptoms, diagnosis, recipe, comment)
     }
 
     fun toEntityFromWrapper(

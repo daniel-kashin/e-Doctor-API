@@ -8,7 +8,7 @@ import java.util.*
 object BodyParameterMapper {
 
     fun toWrapperFromEntity(entity: BodyParameterEntity): BodyParameterWrapper = entity.run {
-        BodyParameterWrapper(uuid, measurementTimestamp, isDeleted, type, firstValue, secondValue, customModelName, customModelUnit)
+        BodyParameterWrapper(uuid, measurementTimestamp, deleted, type, firstValue, secondValue, customModelName, customModelUnit)
     }
 
     fun toEntityFromWrapper(

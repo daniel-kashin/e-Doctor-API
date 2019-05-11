@@ -70,7 +70,7 @@ class AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         val dataSource = DriverManagerDataSource()
         dataSource.url = "jdbc:mysql://localhost:3306/test?serverTimezone=UTC"
         dataSource.username = "root"
-        dataSource.password = "rootroot"
+        dataSource.password = "root"
         return dataSource
     }
 

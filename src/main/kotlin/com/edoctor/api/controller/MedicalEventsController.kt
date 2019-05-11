@@ -1,8 +1,6 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.entities.network.model.record.BodyParameterWrapper
 import com.edoctor.api.entities.network.model.record.MedicalEventWrapper
-import com.edoctor.api.entities.network.model.record.SynchronizeBodyParametersModel
 import com.edoctor.api.entities.network.model.record.SynchronizeEventsModel
 import com.edoctor.api.entities.network.response.MedicalEventsResponse
 import com.edoctor.api.entities.storage.MedicalEventEntity
@@ -62,7 +60,7 @@ class MedicalEventsController {
 
         val events = patient.medicalEvents
                 .asSequence()
-                .filter { !it.isDeleted }
+                .filter { !it.deleted }
                 .filter { toDomain(MedicalEventEntityType(it.type)) in domainAccesses }
                 .map { MedicalEventMapper.toWrapperFromEntity(it) }
                 .toList()

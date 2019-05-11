@@ -65,11 +65,12 @@ class ParametersController {
         val parameters = distinctTypes
                 .mapNotNull {
                     bodyParameterRepository
-                            .findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidOrderByMeasurementTimestampDesc(
+                            .findTopByTypeAndCustomModelNameAndCustomModelUnitAndPatientUuidAndDeletedOrderByMeasurementTimestampDesc(
                                     it.type,
                                     it.customModelName,
                                     it.customModelUnit,
-                                    patient.uuid
+                                    patient.uuid,
+                                    false
                             )
                 }
                 .map { toWrapperFromEntity(it) }
@@ -106,6 +107,7 @@ class ParametersController {
                         type.customModelUnit,
                         patient.uuid
                 )
+                .filter { !it.deleted }
                 .map { toWrapperFromEntity(it) }
 
         return ResponseEntity.ok(BodyParametersResponse(parameters))

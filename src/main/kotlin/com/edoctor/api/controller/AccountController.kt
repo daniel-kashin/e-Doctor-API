@@ -91,6 +91,8 @@ class AccountController {
                     isMale = requestDoctor.isMale
                     yearsOfExperience = requestDoctor.yearsOfExperience
                     category = requestDoctor.category
+                    isReadyForConsultation = requestDoctor.isReadyForConsultation
+                    isReadyForAudio = requestDoctor.isReadyForAudio
                     specialization = requestDoctor.specialization
                     clinicalInterests = requestDoctor.clinicalInterests
                     workExperience = requestDoctor.workExperience

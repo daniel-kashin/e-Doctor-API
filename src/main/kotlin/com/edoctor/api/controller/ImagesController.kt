@@ -1,16 +1,15 @@
 package com.edoctor.api.controller
 
-import com.edoctor.api.configuration.socket.WebSocketConfiguration
 import com.edoctor.api.configuration.socket.WebSocketPrincipal
 import com.edoctor.api.files.ImageFilesStorage
 import com.edoctor.api.repositories.DoctorRepository
 import com.edoctor.api.repositories.PatientRepository
-import mu.KotlinLogging.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.web.multipart.MultipartFile
@@ -47,6 +46,7 @@ class ImagesController {
 
         val headers = HttpHeaders().apply {
             contentLength = imageBytes.size.toLong()
+            contentType = MediaType.IMAGE_PNG
         }
 
         return ResponseEntity(imageBytes, headers, HttpStatus.OK)

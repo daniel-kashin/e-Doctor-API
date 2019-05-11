@@ -20,7 +20,7 @@ class MedicalEventEntity(
         val patient: PatientEntity,
 
         @Column(nullable = false)
-        val isDeleted: Boolean,
+        val deleted: Boolean,
 
         @Column(nullable = false)
         val updateTimestamp: Long,

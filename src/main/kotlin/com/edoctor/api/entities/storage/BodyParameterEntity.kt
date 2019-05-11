@@ -23,7 +23,7 @@ class BodyParameterEntity(
         val updateTimestamp: Long,
 
         @Column(nullable = false)
-        val isDeleted: Boolean,
+        val deleted: Boolean,
 
         @Column(nullable = false)
         var measurementTimestamp: Long,
